@@ -89,7 +89,7 @@
     </dependency>
 
     <dependency>
-      <groupId>com.burukeyou</groupId>
+      <groupId>io.github.burukeyou</groupId>
       <artifactId>fast-retry-all</artifactId>
       <version>0.0.1</version>
     </dependency>
