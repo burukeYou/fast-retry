@@ -1,8 +1,11 @@
 
-# JAVA 高性能百万级任务重试框架 Fast-Retry
-与主流的Spring-Retry, Guava-Retry等同步重试框架不同，Fast-Retry是一个异步重试框架，支持异步任务的重试、超时等待、回调。
-而且基于内置的重试队列，Fast-Retry可以支持百万级任务的重试，
-Spring-Retry, Guava-Retry无法支持大批量任务的重试，因为会占用过多线程资源导致大量任务在等待处理，随着任务数的增加，性能指数级降低，Fast-Retry的性能是前者的指数倍。
+ [![License](http://img.shields.io/badge/license-apache%202-brightgreen.svg)](https://github.com/burukeYou/fast-retry/blob/main/LICENSE)
+
+
+# What is this?
+Fast-Retry是一个高性能任务重试框架，支持百万级别任务的并发重试处理。
+与主流的Spring-Retry, Guava-Retry等同步重试框架不同，Fast-Retry是一个支持异步重试框架，支持异步任务的重试、超时等待、回调。
+Spring-Retry, Guava-Retry均无法支持大批量任务的重试，因为会占用过多线程资源导致大量任务在等待处理，随着任务数的增加，系统吞吐量大大降低，性能指数级降低，Fast-Retry的性能是前者的指数倍。
 
 下图是三者的性能对比
 
@@ -26,8 +29,7 @@ Spring-Retry, Guava-Retry无法支持大批量任务的重试，因为会占用�
 | 1000000 |  58.05秒  | 没测预计：1250000秒 | 没测预计：1250000秒 |
 
 
-
-可以看到即使是处理100万个任务，Fast-Retry的性能也比前者们处理在50个任务时的性能还要快的多的多，
+可以看到即使是处理100万个任务，Fast-Retry的性能也比Spring-Retry和Guava-Retry处理在50个任务时的性能还要快的多的多，
 这么快的秘密在于除了是异步，更重要是当别人在重试间隔里休息的时候，Fast-Retry还在不停忙命的工作着。
 
 ## 引入依赖
@@ -40,6 +42,7 @@ Spring-Retry, Guava-Retry无法支持大批量任务的重试，因为会占用�
 ```
 
 # 快速开始
+有以下三种方式去构建我们的重试任务
 
 ## 1、使用重试队列
 ```java
