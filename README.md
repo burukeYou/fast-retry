@@ -34,7 +34,7 @@ Spring-Retry, Guava-Retry无法支持大批量任务的重试，因为会占用�
 ```xml
     <dependency>
         <groupId>io.github.burukeyou</groupId>
-        <artifactId>fast-retry-core</artifactId>
+        <artifactId>fast-retry-all</artifactId>
         <version>0.0.1</version>
     </dependency>
 ```
