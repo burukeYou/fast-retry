@@ -20,7 +20,7 @@ import java.util.concurrent.*;
 
 /**
  *  Default implementation of retry queue
- * @author burukeyou
+ * @author caizhihao
  */
 @Slf4j
 public class FastRetryQueue implements RetryQueue {

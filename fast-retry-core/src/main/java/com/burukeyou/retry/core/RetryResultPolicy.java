@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 /**
  * Retry result policy
  *
- * @author burukeyou
+ * @author caizhihao
  */
 public interface RetryResultPolicy<T> extends Predicate<T> {
 

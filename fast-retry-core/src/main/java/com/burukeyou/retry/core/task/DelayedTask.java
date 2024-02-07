@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
- * @author burukeyou
+ * @author caizhihao
  */
 public class DelayedTask implements Delayed {
     private final String name;

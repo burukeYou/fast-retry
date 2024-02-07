@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * retry queue
- * @author burukeyou
+ * @author caizhihao
  */
 public interface RetryQueue {
 

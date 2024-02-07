@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * retry task
- * @author burukeyou
+ * @author caizhihao
  */
 public interface RetryTask<R> {
 

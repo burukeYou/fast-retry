@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Next retry interval time
  *
- * @author burukeyou
+ * @author caizhihao
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

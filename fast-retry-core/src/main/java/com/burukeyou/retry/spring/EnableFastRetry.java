@@ -8,7 +8,7 @@ import org.springframework.core.Ordered;
 import java.lang.annotation.*;
 
 /**
- * @author burukeyou
+ * @author caizhihao
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

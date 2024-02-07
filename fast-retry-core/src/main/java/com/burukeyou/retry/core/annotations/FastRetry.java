@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 /**
  * Retry annotation
  *
- * @author burukeyou
+ * @author caizhihao
  *
  */
 @Target({ElementType.METHOD,ElementType.TYPE})
