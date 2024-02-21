@@ -21,7 +21,8 @@ public class FastRetryBuilderTest {
                 .attemptMaxTimes(3)
                 .waitRetryTime(3, TimeUnit.SECONDS)
                 .retryIfException(true)
-                .retryIfExceptionOfType(TimeoutException.class)
+                .retryIfExceptionOfType(IllegalArgumentException.class)
+                .notRetryIfExceptionOfType(TimeoutException.class)
                 .exceptionRecover(true)
                 .resultPolicy(resultPolicy)
                 .build();
@@ -31,7 +32,7 @@ public class FastRetryBuilderTest {
             //throw new Exception("test");
             //int i = 1/0;
             if (0 < 10){
-                throw new TimeoutException("test");
+                throw new IllegalArgumentException("test");
             }
             return "444";
         });

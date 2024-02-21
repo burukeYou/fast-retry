@@ -9,7 +9,6 @@ import com.burukeyou.retry.core.task.DelayedTask;
 import com.burukeyou.retry.core.task.RetryTask;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -186,26 +185,42 @@ public class FastRetryQueue implements RetryQueue {
                 return false;
             } catch (Exception e) {
                 lastException = e;
-                log.info("",e);
+                if (task.printExceptionLog()){
+                    log.info("",e);
+                }
                 if (!task.retryIfException()){
                     return false;
                 }
-                List<Class<? extends Exception>> exceptionTypeList = task.retryIfExceptionByType();
-                if (CollectionUtils.isEmpty(exceptionTypeList)){
+
+                // not retry
+                if(isContainException(task.exclude(),lastException)){
+                    return false;
+                }
+
+                if (task.include() == null || task.include().isEmpty()){
+                    // not config include exception ,retry all exception
                     return true;
                 }
 
-                for (Class<? extends Throwable> aClass : task.retryIfExceptionByType()) {
-                    if (aClass.isAssignableFrom(e.getClass())){
-                        return true;
-                    }
-                }
-                return false;
+                return isContainException(task.include(), lastException);
             }
         }
 
         public void stopRetry() {
             this.isStop = true;
+        }
+
+        public boolean isContainException(List<Class<? extends Exception>> excludeExceptionList,Exception e){
+            if (excludeExceptionList == null || excludeExceptionList.isEmpty()){
+                return false;
+            }
+
+            for (Class<? extends Throwable> ex : excludeExceptionList) {
+                if (ex.isAssignableFrom(e.getClass())){
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

@@ -14,4 +14,5 @@ public class RetryTaskContext {
     private Boolean exceptionRecover;
     private RetryResultPolicy<Object> resultPolicy;
     private List<Class<? extends Exception>> exceptionsType;
+    private List<Class<? extends Exception>> excludeExceptionsType;
 }

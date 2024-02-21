@@ -1,6 +1,7 @@
 package com.burukeyou.retry.core.task;
 
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,8 +48,17 @@ public interface RetryTask<R> {
      *
      * @return exception types to retry
      */
-    default List<Class<? extends Exception>> retryIfExceptionByType() {
-        return null;
+    default List<Class<? extends Exception>> include() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Exception types that are not retryable.
+     *
+     * @return exception types to stop retry
+     */
+    default List<Class<? extends Exception>> exclude(){
+        return Collections.emptyList();
     }
 
     /**
@@ -60,5 +70,12 @@ public interface RetryTask<R> {
         return false;
     }
 
+    /**
+     * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
+     * but no matter how you set it up,it will print the last time exception log
+     */
+    default boolean printExceptionLog() {
+        return true;
+    }
 
 }

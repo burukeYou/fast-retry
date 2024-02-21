@@ -60,8 +60,13 @@ public class RetryBuilderRetryTask implements RetryTask<Object> {
     }
 
     @Override
-    public List<Class<? extends Exception>> retryIfExceptionByType() {
+    public List<Class<? extends Exception>> include() {
         return retryTaskContext.getExceptionsType();
+    }
+
+    @Override
+    public List<Class<? extends Exception>> exclude() {
+        return retryTaskContext.getExcludeExceptionsType();
     }
 
     @Override

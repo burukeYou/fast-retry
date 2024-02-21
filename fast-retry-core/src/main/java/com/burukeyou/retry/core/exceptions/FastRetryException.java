@@ -1,7 +1,7 @@
 package com.burukeyou.retry.core.exceptions;
 
 
-public abstract class FastRetryException extends RuntimeException {
+public  class FastRetryException extends RuntimeException {
 
     private static final long serialVersionUID = 5439915454935047936L;
 

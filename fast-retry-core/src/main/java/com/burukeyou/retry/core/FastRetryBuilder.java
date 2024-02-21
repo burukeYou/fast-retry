@@ -42,6 +42,7 @@ public class FastRetryBuilder<V> {
     private static RetryQueue defaultRetryQueue;
 
     private List<Class<? extends Exception>> exceptions;
+    private List<Class<? extends Exception>> excludeExceptions;
 
     private Integer attemptMaxTimes = 100;
     private Long waitRetryTime = 2 * 1000L;
@@ -104,6 +105,14 @@ public class FastRetryBuilder<V> {
     }
 
     /**
+     * @param exceptionClass     Exception types that are not retryable.
+     */
+    public FastRetryBuilder<V> notRetryIfExceptionOfType(Class<? extends Exception>...exceptionClass) {
+        excludeExceptions = Arrays.asList(exceptionClass);
+        return this;
+    }
+
+    /**
      * @param flag   whether recover when an exception occurs
      */
     public FastRetryBuilder<V> exceptionRecover(boolean flag) {
@@ -150,6 +159,7 @@ public class FastRetryBuilder<V> {
         retryTaskContext.setExceptionRecover(exceptionRecover);
         retryTaskContext.setResultPolicy((RetryResultPolicy<Object>) resultPolicy);
         retryTaskContext.setExceptionsType(exceptions);
+        retryTaskContext.setExcludeExceptionsType(excludeExceptions);
         return new FastRetryer<>(retryQueue,retryTaskContext);
     }
 

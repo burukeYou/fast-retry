@@ -37,7 +37,7 @@ Spring-Retry, Guava-Retry均无法支持大批量任务的重试，因为会占�
     <dependency>
         <groupId>io.github.burukeyou</groupId>
         <artifactId>fast-retry-all</artifactId>
-        <version>0.0.1</version>
+        <version>1.0.0</version>
     </dependency>
 ```
 
@@ -96,9 +96,9 @@ Spring-Retry, Guava-Retry均无法支持大批量任务的重试，因为会占�
         log.info("结果{}", o);
 ```
 
-## 3、使用注解
+## 3、使用FastRetry注解
 - 依赖Spring环境，所以需要在配置上加上@EnableFastRetry注解启用配置才生效
-- 将结果类型使用CompletableFuture，自动进行异步轮询返回
+- 如果将结果类型使用CompletableFuture包装，自动进行异步轮询返回，否则同步阻塞等待重试结果。 
 
 下面定义等价于 FastRetryer.execute方法
 ```

@@ -5,7 +5,6 @@ import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.RetryResultPolicy;
 import com.burukeyou.retry.spring.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.FastRetryAnnotationRetryTaskFactory;
-import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
@@ -28,15 +27,7 @@ public @interface FastRetry {
      *
      * @return   the name of retry-queue
      */
-    @AliasFor("value")
     String queueName() default "";
-
-    /**
-     * as same as {@link FastRetry#queueName()}
-     * @return the name of retry-queue
-     */
-    @AliasFor("queueName")
-    String value() default "";
 
     /**
      * Use the bean class of the specified retry queue
@@ -55,7 +46,14 @@ public @interface FastRetry {
      *
      * @return exception types to retry
      */
-    Class<? extends Exception>[] retryIfExceptionOfType() default {};
+    Class<? extends Exception>[] include() default {};
+
+    /**
+     * Exception types that are not retryable.
+     *
+     * @return exception types to stop retry
+     */
+    Class<? extends Exception>[] exclude() default {};
 
     /**
      * Flag to say that whether recover when an exception occurs
@@ -63,6 +61,12 @@ public @interface FastRetry {
      * @return throw exception if false, if true return null and print exception log
      */
     boolean exceptionRecover() default false;
+
+    /**
+     * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
+     * but no matter how you set it up,it will print the last time exception log
+     */
+     boolean printExceptionLog() default true;
 
     /**
      *  use custom result retry strategy,
@@ -76,7 +80,6 @@ public @interface FastRetry {
      * @return the maximum number of attempts , if -1, it means unlimited
      */
     int maxAttempts() default -1;
-
 
     /**
      * Specify the RetryWait properties for retrying this operation. The default is a simple

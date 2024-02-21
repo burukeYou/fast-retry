@@ -73,13 +73,23 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     @Override
-    public List<Class<? extends Exception>> retryIfExceptionByType() {
-        return Arrays.asList(retry.retryIfExceptionOfType());
+    public List<Class<? extends Exception>> include() {
+        return Arrays.asList(retry.include());
+    }
+
+    @Override
+    public List<Class<? extends Exception>> exclude() {
+        return Arrays.asList(retry.exclude());
     }
 
     @Override
     public boolean exceptionRecover() {
         return retry.exceptionRecover();
+    }
+
+    @Override
+    public boolean printExceptionLog() {
+        return retry.printExceptionLog();
     }
 
     protected Predicate<Object> getPredicateStrategy(FastRetry retryAnnotation) {

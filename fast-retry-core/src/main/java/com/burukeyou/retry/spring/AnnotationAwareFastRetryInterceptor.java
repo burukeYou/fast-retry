@@ -3,6 +3,7 @@ package com.burukeyou.retry.spring;
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.annotations.FastRetry;
+import com.burukeyou.retry.core.exceptions.FastRetryException;
 import com.burukeyou.retry.core.support.RetryAnnotationMeta;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -106,16 +107,20 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
 
     private RetryQueue getRetryQueue(FastRetry retry) {
         RetryQueue bean = null;
-        String queueName = retry.queueName();
-        if (StringUtils.isNotBlank(queueName)){
-            bean =  beanFactory.getBean(queueName, RetryQueue.class);
-            return bean;
-        }
+        try {
+            String queueName = retry.queueName();
+            if (StringUtils.isNotBlank(queueName)){
+                bean =  beanFactory.getBean(queueName, RetryQueue.class);
+                return bean;
+            }
 
-        if (retry.queueClass() != null && retry.queueClass().length != 0){
-            bean = beanFactory.getBean(retry.queueClass()[0]);
-        }else {
-            bean = getDefaultRetryQueue();
+            if (retry.queueClass() != null && retry.queueClass().length != 0){
+                bean = beanFactory.getBean(retry.queueClass()[0]);
+            }else {
+                bean = getDefaultRetryQueue();
+            }
+        } catch (BeansException e) {
+            throw new FastRetryException("can not find custom retry queue bean from spring context",e);
         }
         return bean;
     }

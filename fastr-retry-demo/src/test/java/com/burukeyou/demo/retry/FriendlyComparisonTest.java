@@ -171,7 +171,7 @@ public class FriendlyComparisonTest extends BaseSpringTest {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        int taskSize = 1;
+        int taskSize = 10;
 
         List<CompletableFuture<WeatherResult>> futures = new ArrayList<>();
         for (int i = 0; i < taskSize; i++) {

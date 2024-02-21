@@ -2,6 +2,7 @@ package com.burukeyou.retry.data;
 
 
 import com.burukeyou.retry.core.FastRetryBuilder;
+import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.RetryResultPolicy;
 import com.burukeyou.retry.core.annotations.FastRetry;
 import com.burukeyou.retry.core.annotations.RetryWait;
@@ -47,7 +48,7 @@ public class WeatherService {
         return new WeatherResult(cityName + "-哈哈");
     }
 
-    @FastRetry(retryWait = @RetryWait(delay = 2),retryStrategy = WeatherServiceResultPredicate.class,exceptionRecover = true)
+    @FastRetry(queueClass = RetryQueue.class,maxAttempts = 2,retryWait = @RetryWait(delay = 4),retryStrategy = WeatherServiceResultPredicate.class,exceptionRecover = true)
     public WeatherResult getWeatherForTestRetryStrategy(String cityName){
         log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
         return new WeatherResult(cityName + "-哈哈");

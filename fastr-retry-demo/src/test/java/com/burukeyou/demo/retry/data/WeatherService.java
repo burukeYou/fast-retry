@@ -91,7 +91,7 @@ public class WeatherService {
     @FastRetry(
             maxAttempts = 100,
             queueName = B15Configuration.USER_RETRY_QUEUE,
-            retryWait = @RetryWait(delay = 2,timeUnit = TimeUnit.SECONDS),exceptionRecover = true)
+            retryWait = @RetryWait(delay = 2,timeUnit = TimeUnit.SECONDS),exceptionRecover = true,printExceptionLog = false)
     public CompletableFuture<WeatherResult> getFutureWeatherForCompare(String cityName){
         log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
         WeatherResult weather = WeatherServer.getWeather(cityName);
