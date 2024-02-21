@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * a retryer that can submit and execute retry tasks
  * but all is delegate to the retry queue
- * @author  burukeyou
+ * @author  caizhihao
  * @param <T>
  */
 public class FastRetryer<T>  {

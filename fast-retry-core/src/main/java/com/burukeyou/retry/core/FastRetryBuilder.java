@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * ensure presence of happens-before between publication and any usage. (e.g. publication
  * via volatile write, or other safe publication technique)
  *
- * @author buruekeyou
+ * @author caizhihao
  */
 public class FastRetryBuilder<V> {
 
