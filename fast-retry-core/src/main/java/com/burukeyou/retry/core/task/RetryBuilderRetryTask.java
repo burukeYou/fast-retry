@@ -1,6 +1,7 @@
 package com.burukeyou.retry.core.task;
 
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
+import com.burukeyou.retry.core.support.FutureCallable;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,7 +17,7 @@ public class RetryBuilderRetryTask implements RetryTask<Object> {
 
 
     public RetryBuilderRetryTask(Callable<Object> runnable,RetryTaskContext retryTaskContext) {
-        this.runnable = runnable;
+        this.runnable = new FutureCallable<>(runnable);
         this.retryTaskContext = retryTaskContext;
         this.resultRetryPredicate = getPredicateStrategy(retryTaskContext);
     }

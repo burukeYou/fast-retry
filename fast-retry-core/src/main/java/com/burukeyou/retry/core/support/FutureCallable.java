@@ -6,6 +6,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ *  support the future result
+ * @param <T>
+ */
 public class FutureCallable<T> implements Callable<T> {
 
     private Callable<T> callable;

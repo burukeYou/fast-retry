@@ -3,6 +3,7 @@ package com.burukeyou.retry.spring;
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.annotations.FastRetry;
+import com.burukeyou.retry.core.support.RetryAnnotationMeta;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.StringUtils;
@@ -10,15 +11,22 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class AnnotationAwareFastRetryInterceptor implements IntroductionInterceptor, BeanFactoryAware {
 
     private static RetryQueue defaultRetryQueue;
-    private BeanFactory beanFactory;
+    private ListableBeanFactory beanFactory;
+
+    private final ConcurrentReferenceHashMap<Object, ConcurrentMap<Method, MethodInterceptor>> delegatesCache = new ConcurrentReferenceHashMap<>();
+
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -27,18 +35,48 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
     }
 
     private MethodInterceptor getDelegate(Object target, Method method) {
+        ConcurrentMap<Method, MethodInterceptor> methodInterceptorMap = delegatesCache.getOrDefault(target, new ConcurrentHashMap<>());
+        MethodInterceptor methodInterceptor = methodInterceptorMap.get(method);
+        if (methodInterceptor != null) {
+           return methodInterceptor;
+        }
+
+        RetryAnnotationMeta retryable = getFastRetryAnnotation(target, method);
+        if (retryable == null) {
+            return null;
+        }
+
+        FastRetryOperationsInterceptor interceptor = getRetryInterceptor(retryable);
+        methodInterceptorMap.put(method,interceptor);
+        delegatesCache.putIfAbsent(target, methodInterceptorMap);
+        return interceptor;
+    }
+
+    private RetryAnnotationMeta getFastRetryAnnotation(Object target, Method method) {
         FastRetry retryable = AnnotatedElementUtils.findMergedAnnotation(method, FastRetry.class);
         if (retryable == null) {
             retryable = findAnnotationOnTarget(target, method, FastRetry.class);
         }
-        if (retryable == null){
-            return null;
+
+        if (retryable != null){
+            Annotation[] annotations = method.getAnnotations();
+            for (Annotation a : annotations){
+                Class<? extends Annotation> annotationType = a.annotationType();
+                FastRetry declaredAnnotation = annotationType.getAnnotation(FastRetry.class);
+                if (declaredAnnotation != null){
+                    return new RetryAnnotationMeta(retryable,a);
+                }
+            }
+            return new RetryAnnotationMeta(retryable,retryable);
         }
 
-        FastRetryOperationsInterceptor interceptor = new FastRetryOperationsInterceptor();
-        interceptor.setRetryQueue(getRetryQueue(retryable));
-        interceptor.setBeanFactory(beanFactory);
-        return interceptor;
+        return null;
+    }
+
+    private FastRetryOperationsInterceptor getRetryInterceptor(RetryAnnotationMeta retryable) {
+        FastRetryOperationsInterceptor tmpInterceptor = new FastRetryOperationsInterceptor(beanFactory,retryable);
+        tmpInterceptor.setRetryQueue(getRetryQueue(retryable.getFastRetry()));
+        return tmpInterceptor;
     }
 
     @Override
@@ -51,6 +89,9 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
         try {
             Method targetMethod = target.getClass().getMethod(method.getName(), method.getParameterTypes());
             A retryable = AnnotatedElementUtils.findMergedAnnotation(targetMethod, annotation);
+            if (retryable == null) {
+                retryable = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), annotation);
+            }
             return retryable;
         }
         catch (Exception e) {
@@ -60,7 +101,7 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
+        this.beanFactory = (ListableBeanFactory)beanFactory;
     }
 
     private RetryQueue getRetryQueue(FastRetry retry) {

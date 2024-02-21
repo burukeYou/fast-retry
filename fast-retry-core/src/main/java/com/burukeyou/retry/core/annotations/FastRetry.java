@@ -3,6 +3,8 @@ package com.burukeyou.retry.core.annotations;
 
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.spring.AnnotationRetryTaskFactory;
+import com.burukeyou.retry.spring.FastRetryAnnotationRetryTaskFactory;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -16,6 +18,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+//@Inherited
 public @interface FastRetry {
 
     /***
@@ -83,4 +86,8 @@ public @interface FastRetry {
      */
     RetryWait retryWait() default @RetryWait();
 
+    /**
+     * Specify the factory bean for building RetryTask
+     */
+    Class<? extends AnnotationRetryTaskFactory> factory() default FastRetryAnnotationRetryTaskFactory.class;
 }

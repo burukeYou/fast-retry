@@ -28,8 +28,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @author caizhihao
+ */
 //@Component
-public class FastRetryAutoConfiguration extends AbstractPointcutAdvisor
+public class FastRetryAdvisorConfiguration extends AbstractPointcutAdvisor
         implements InitializingBean, IntroductionAdvisor, ImportAware, BeanFactoryAware {
 
     private static final long serialVersionUID = -1699797326589993828L;
@@ -41,7 +44,7 @@ public class FastRetryAutoConfiguration extends AbstractPointcutAdvisor
 
     private BeanFactory beanFactory;
 
-    public FastRetryAutoConfiguration() {
+    public FastRetryAdvisorConfiguration() {
         this.pointcutAnnotations = Collections.singletonList(FastRetry.class);
     }
 

@@ -13,12 +13,12 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAspectJAutoProxy(proxyTargetClass = false)
-@Import(FastRetryAutoConfiguration.class)
+@Import({FastRetryAdvisorConfiguration.class,FastRetrySpringConfiguration.class})
 @Documented
 public @interface EnableFastRetry {
 
     /**
-     * Indicate the order in which the {@link FastRetryAutoConfiguration} AOP <b>advice</b> should
+     * Indicate the order in which the {@link FastRetryAdvisorConfiguration} AOP <b>advice</b> should
      * be applied.
      * <p>
      * The default is {@code Ordered.LOWEST_PRECEDENCE - 1} in order to make sure the

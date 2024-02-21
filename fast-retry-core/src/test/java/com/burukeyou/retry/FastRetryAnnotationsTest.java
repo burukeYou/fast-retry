@@ -1,10 +1,7 @@
 package com.burukeyou.retry;
 
 import com.burukeyou.retry.core.exceptions.FastRetryTimeOutException;
-import com.burukeyou.retry.data.B15Configuration;
-import com.burukeyou.retry.data.BaseSpringTest;
-import com.burukeyou.retry.data.WeatherResult;
-import com.burukeyou.retry.data.WeatherService;
+import com.burukeyou.retry.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;

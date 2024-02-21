@@ -3,36 +3,34 @@ package com.burukeyou.retry.core.task;
 import com.burukeyou.retry.core.annotations.FastRetry;
 import com.burukeyou.retry.core.annotations.RetryWait;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
+import com.burukeyou.retry.core.support.FutureCallable;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 
 public class RetryAnnotationTask implements RetryTask<Object> {
 
-    private final Supplier<Object> runnable;
+    private final Callable<Object> runnable;
     private final FastRetry retry;
     private final RetryWait retryWait;
 
     private Object methodResult;
     private final Predicate<Object> resultRetryPredicate;
 
-    private final BeanFactory  applicationContext;
+    private final BeanFactory beanFactory;
 
-    public RetryAnnotationTask(Supplier<Object> runnable,
+    public RetryAnnotationTask(Callable<Object> runnable,
                                FastRetry retry,
-                               RetryWait retryWait,
-                               BeanFactory applicationContext) {
-        this.runnable = runnable;
+                               BeanFactory beanFactory) {
+        this.runnable = new FutureCallable<>(runnable);
         this.retry = retry;
-        this.retryWait = retryWait;
-        this.applicationContext = applicationContext;
+        this.retryWait = retry.retryWait();
+        this.beanFactory = beanFactory;
         this.resultRetryPredicate = getPredicateStrategy(retry);
     }
 
@@ -51,22 +49,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     @Override
     public boolean retry()  throws Exception {
-        methodResult = runnable.get();
-        if (methodResult instanceof CompletableFuture){
-            try {
-                methodResult = ((CompletableFuture<?>) methodResult).get();
-            } catch (InterruptedException e) {
-                throw e;
-            } catch (ExecutionException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof Exception){
-                    throw (Exception) cause;
-                } else {
-                    throw e;
-                }
-            }
-        }
-
+        methodResult = runnable.call();
         if (resultRetryPredicate != null){
             try {
                 return resultRetryPredicate.test(methodResult);
@@ -103,9 +86,9 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         Predicate<Object> predicate = null;
         if (retryAnnotation.retryStrategy().length > 0){
             Class<? extends Predicate<?>> retryStrategy = retryAnnotation.retryStrategy()[0];
-            if (applicationContext != null){
+            if (beanFactory != null){
                 try {
-                    predicate = (Predicate<Object>) applicationContext.getBean(retryStrategy);
+                    predicate = (Predicate<Object>) beanFactory.getBean(retryStrategy);
                 } catch (Exception e) {
                     predicate = null;
                 }

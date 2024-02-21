@@ -7,8 +7,6 @@ import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.support.RetryQueueFuture;
 import com.burukeyou.retry.core.task.DelayedTask;
 import com.burukeyou.retry.core.task.RetryTask;
-import com.burukeyou.retry.core.waiter.ExchangerWaiter;
-import com.burukeyou.retry.core.waiter.Waiter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -24,8 +22,6 @@ import java.util.concurrent.*;
  */
 @Slf4j
 public class FastRetryQueue implements RetryQueue {
-
-    private final Waiter waiter = new ExchangerWaiter();
 
     private final BlockingQueue<QueueTask> retryTaskQueue = new LinkedTransferQueue<>();
 
@@ -177,7 +173,7 @@ public class FastRetryQueue implements RetryQueue {
             }
             int maxTimes = task.attemptMaxTimes();
             if (maxTimes > 0 && count > maxTimes){
-                lastException =  new FastRetryTimeOutException("The maximum retry count has been exceeded after"+maxTimes+" times. Stop retry");
+                lastException =  new FastRetryTimeOutException("The maximum retry count has been exceeded after "+maxTimes+" times. Stop retry");
                 return false;
             }
 

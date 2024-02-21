@@ -1,6 +1,5 @@
 package com.burukeyou.retry.core;
 
-import com.burukeyou.retry.core.support.FutureCallable;
 import com.burukeyou.retry.core.task.RetryBuilderRetryTask;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.core.task.RetryTaskContext;
@@ -60,8 +59,7 @@ public class FastRetryer<T>  {
     }
 
     private RetryTask<T> buildRetryTask(Callable<T> callable) {
-        Callable<T> futureCallable = new FutureCallable<>(callable);
-        RetryBuilderRetryTask retryTask = new RetryBuilderRetryTask((FutureCallable<Object>) futureCallable, retryTaskContext);
+        RetryBuilderRetryTask retryTask = new RetryBuilderRetryTask((Callable<Object>) callable, retryTaskContext);
         return (RetryTask<T>) retryTask;
     }
 
