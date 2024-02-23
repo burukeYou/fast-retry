@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 //@Inherited
 public @interface FastRetry {
 
-    /***
+    /**
      * Use the BeanName of the specified retry queue
      *          If not specified, get it from spring-context according to the  value of {@link FastRetry#queueClass()}
      *          If none of them are configured, use the default built-in retry queue

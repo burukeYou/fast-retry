@@ -1,6 +1,15 @@
 
+# Fast-Retry
+
+-------
+![travis](https://travis-ci.org/nRo/DataFrame.svg?branch=master)
  [![License](http://img.shields.io/badge/license-apache%202-brightgreen.svg)](https://github.com/burukeYou/fast-retry/blob/main/LICENSE)
 
+
+# Documentation
+
+-------
+[![Javadocs](http://javadoc.io/badge/de.unknownreality/dataframe.svg?color=blue)](http://javadoc.io/doc/io.github.burukeyou/fast-retry-all)
 
 # What is this?
 Fast-Retry是一个高性能任务重试框架，支持百万级别任务的并发重试处理。

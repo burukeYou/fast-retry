@@ -1,8 +1,8 @@
 package com.burukeyou.demo.retry;
 
 import com.burukeyou.demo.retry.data.MyRetryTask;
-import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
+import com.burukeyou.retry.core.RetryQueueFactory;
 import com.burukeyou.retry.core.task.RetryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class RetryQueueTest  {
     @Test
     public void testExecute1111() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
         RetryTask<String> task = new RetryTask<String>() {
             int result = 0 ;
             @Override
@@ -48,7 +48,7 @@ public class RetryQueueTest  {
     @Test
     public void testExecute() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
 
         MyRetryTask task = new MyRetryTask("北京");
         Object execute = queue.execute(task);
@@ -64,7 +64,7 @@ public class RetryQueueTest  {
     @Test
     public void testExecuteTimeOut() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
 
         MyRetryTask task = new MyRetryTask("北京");
         Object execute = queue.execute(task,3, TimeUnit.SECONDS);
@@ -80,7 +80,7 @@ public class RetryQueueTest  {
     @Test
     public void testSubmitGet() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
 
         MyRetryTask task = new MyRetryTask("北京");
         CompletableFuture<String> future = queue.submit(task);
@@ -100,7 +100,7 @@ public class RetryQueueTest  {
     @Test
     public void testSubmitCallback() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
 
         MyRetryTask task = new MyRetryTask("北京");
         CompletableFuture<String> future = queue.submit(task);
@@ -119,7 +119,7 @@ public class RetryQueueTest  {
     @Test
     public void testSubmitManyTask() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
         List<CompletableFuture<String>> allList = new CopyOnWriteArrayList<>();
 
         StopWatch watch = new StopWatch();
@@ -147,7 +147,7 @@ public class RetryQueueTest  {
     @Test
     public void testSubmitManyTask2() throws Exception {
         //ExecutorService executorService = Executors.newFixedThreadPool(3);
-        RetryQueue queue = new FastRetryQueue(8);
+        RetryQueue queue = RetryQueueFactory.get();
         List<CompletableFuture<String>> allList = new CopyOnWriteArrayList<>();
 
         StopWatch watch = new StopWatch();

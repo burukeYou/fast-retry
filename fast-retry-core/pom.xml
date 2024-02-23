@@ -133,7 +133,7 @@
         <version>0.3.0</version>
         <extensions>true</extensions>
         <configuration>
-          <publishingServerId>central</publishingServerId>
+          <publishingServerId>${sno.serviceId}</publishingServerId>
           <tokenAuth>true</tokenAuth>
           <deploymentName>fast-retry-all</deploymentName>
         </configuration>

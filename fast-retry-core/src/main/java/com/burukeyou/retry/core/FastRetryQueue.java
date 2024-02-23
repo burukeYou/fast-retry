@@ -36,7 +36,7 @@ public class FastRetryQueue implements RetryQueue {
     }
 
     public FastRetryQueue(int corePoolSize) {
-        this(Executors.newScheduledThreadPool(corePoolSize));
+        this(new ThreadPoolExecutor(corePoolSize, corePoolSize*2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()));
     }
 
     private void start() {
