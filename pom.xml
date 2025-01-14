@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.burukeyou</groupId>
+    <artifactId>fast-retry</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+
+    <!-- info  -->
+    <name>fast-retry</name>
+    <url>https://github.com/burukeYou/fast-retry</url>
+    <description>A high-performance task retry framework</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <sno.serviceId>central</sno.serviceId>
+
+        <revision>0.3.0</revision>
+        <fast-retry-core-version>0.3.0</fast-retry-core-version>
+        <fast-retry-spring-version>0.3.0</fast-retry-spring-version>
+    </properties>
+
+    <modules>
+        <module>fast-retry-core</module>
+        <module>fast-retry-spring</module>
+    </modules>
+
+</project>
