@@ -36,7 +36,7 @@ public class FastRetryQueue implements RetryQueue {
     }
 
     public FastRetryQueue(int corePoolSize) {
-        this(Executors.newScheduledThreadPool(corePoolSize));
+        this(Executors.newFixedThreadPool(corePoolSize, r -> new Thread(r, "fast-retry-queue-thread")));
     }
 
     private void start() {
@@ -155,7 +155,7 @@ public class FastRetryQueue implements RetryQueue {
 
         private boolean isStop = false;
 
-        private Integer count = 0;
+        private long count = 0;
 
         private Exception lastException;
 
@@ -170,7 +170,7 @@ public class FastRetryQueue implements RetryQueue {
             if (isStop){
                 return false;
             }
-            int maxTimes = task.attemptMaxTimes();
+            long maxTimes = task.attemptMaxTimes();
             if (maxTimes > 0 && count > maxTimes){
                 lastException =  new FastRetryTimeOutException("The maximum retry count has been exceeded after "+maxTimes+" times. Stop retry");
                 return false;
@@ -178,7 +178,7 @@ public class FastRetryQueue implements RetryQueue {
 
             this.count = this.count + 1;
             try {
-                return task.retry();
+                return task.retry(count);
             }catch (RetryPolicyCastException e){
                 // not retry
                 lastException = e;

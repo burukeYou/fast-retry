@@ -26,9 +26,10 @@ public interface RetryTask<R> {
 
     /**
      * Perform retry
-     * @return      whether try again, try again if true
+     * @param curRetryCount             current retry count
+     * @return                          whether try again, try again if true
      */
-    boolean retry() throws Exception;
+    boolean retry(long curRetryCount) throws Exception;
 
     /**
      * @return the  retry result

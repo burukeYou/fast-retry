@@ -21,8 +21,8 @@
         <sno.serviceId>central</sno.serviceId>
 
         <revision>0.3.0</revision>
-        <fast-retry-core-version>0.3.0</fast-retry-core-version>
-        <fast-retry-spring-version>0.3.0</fast-retry-spring-version>
+        <fast-retry-core-version>${revision}</fast-retry-core-version>
+        <fast-retry-spring-version>${revision}</fast-retry-spring-version>
     </properties>
 
     <modules>
