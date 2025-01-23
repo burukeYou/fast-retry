@@ -15,20 +15,12 @@
     <version>${fast-retry-spring-version}</version>
     <packaging>jar</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <sno.serviceId>central</sno.serviceId>
-    </properties>
-
 
     <dependencies>
 
         <dependency>
             <groupId>io.github.burukeyou</groupId>
             <artifactId>fast-retry-core</artifactId>
-            <version>${fast-retry-core-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

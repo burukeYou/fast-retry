@@ -10,7 +10,6 @@
         <version>${revision}</version>
     </parent>
 
-
     <artifactId>fast-retry-core</artifactId>
     <version>${fast-retry-core-version}</version>
     <packaging>jar</packaging>
