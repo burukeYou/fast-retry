@@ -5,6 +5,9 @@ import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.RetryResultPolicy;
 import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.FastRetryAnnotationRetryTaskFactory;
+import com.burukeyou.retry.spring.core.RetryAnnotationTask;
+import com.burukeyou.retry.spring.interceptor.DefaultFastRetryMethodInterceptor;
+import com.burukeyou.retry.spring.interceptor.FastRetryMethodInterceptor;
 
 import java.lang.annotation.*;
 
@@ -28,6 +31,19 @@ public @interface FastRetry {
      * @return   the name of retry-queue
      */
     String queueName() default "";
+
+    /**
+     * @return the maximum number of attempts , if -1, it means unlimited
+     */
+    int maxAttempts() default 3;
+
+    /**
+     * Specify the RetryWait properties for retrying this operation. The default is a simple
+     * {@link RetryWait} specification with no properties - see its documentation for
+     * defaults.
+     * @return a RetryWait specification
+     */
+    RetryWait retryWait() default @RetryWait();
 
     /**
      * Use the bean class of the specified retry queue
@@ -66,7 +82,7 @@ public @interface FastRetry {
      * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
      * but no matter how you set it up,it will print the last time exception log
      */
-     boolean printExceptionLog() default true;
+     boolean printExceptionLog() default false;
 
     /**
      *  use custom result retry strategy,
@@ -77,20 +93,13 @@ public @interface FastRetry {
     Class<? extends RetryResultPolicy<?>>[] retryStrategy() default {};
 
     /**
-     * @return the maximum number of attempts , if -1, it means unlimited
+     *  Retry Interceptor
      */
-    int maxAttempts() default -1;
+    Class<? extends FastRetryMethodInterceptor>[] interceptor() default {DefaultFastRetryMethodInterceptor.class};
 
     /**
-     * Specify the RetryWait properties for retrying this operation. The default is a simple
-     * {@link RetryWait} specification with no properties - see its documentation for
-     * defaults.
-     * @return a RetryWait specification
-     */
-    RetryWait retryWait() default @RetryWait();
-
-    /**
-     * Specify the factory bean for building RetryTask
+     * Specify the factory bean for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory
      */
     Class<? extends AnnotationRetryTaskFactory> factory() default FastRetryAnnotationRetryTaskFactory.class;
+
 }

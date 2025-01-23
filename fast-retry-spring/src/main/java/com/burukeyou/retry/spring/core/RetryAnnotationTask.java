@@ -6,7 +6,11 @@ import com.burukeyou.retry.core.support.FutureCallable;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
+import com.burukeyou.retry.spring.interceptor.FastRetryMethodInterceptor;
+import com.burukeyou.retry.spring.support.FastRetryMethodInvocationImpl;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,14 +30,20 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     private final BeanFactory beanFactory;
 
+    private FastRetryMethodInterceptor retryMethodInterceptor;
+
+    private MethodInvocation methodInvocation;
+
     public RetryAnnotationTask(Callable<Object> runnable,
                                FastRetry retry,
-                               BeanFactory beanFactory) {
+                               BeanFactory beanFactory, MethodInvocation methodInvocation) {
         this.runnable = new FutureCallable<>(runnable);
         this.retry = retry;
         this.retryWait = retry.retryWait();
         this.beanFactory = beanFactory;
+        this.methodInvocation = methodInvocation;
         this.resultRetryPredicate = getPredicateStrategy(retry);
+        this.retryMethodInterceptor = getFastRetryMethodInterceptor(retry);
     }
 
     @Override
@@ -50,17 +60,43 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
 
     @Override
-    public boolean retry(long curRetryCount)  throws Exception {
-        methodResult = runnable.call();
-        if (resultRetryPredicate != null){
+    public boolean retry(long curExecuteCount) throws Exception {
+        FastRetryMethodInvocationImpl retryMethodInvocation = null;
+        boolean stopFlag = false;
+        if (retryMethodInterceptor != null) {
+            retryMethodInvocation = new FastRetryMethodInvocationImpl(curExecuteCount, methodInvocation);
+            stopFlag = retryMethodInterceptor.beforeExecute(retryMethodInvocation);
+            if (!stopFlag) {
+                return false;
+            }
+        }
+
+        Exception exception = null;
+        try {
+            methodResult = runnable.call();
+        } catch (Exception e) {
+            exception = e;
+        }
+
+        if (retryMethodInterceptor != null) {
+            stopFlag = retryMethodInterceptor.afterExecute(exception, methodResult, retryMethodInvocation);
+            if (!stopFlag) {
+                return false;
+            }
+        } else if (exception != null) {
+            throw exception;
+        }
+
+        if (resultRetryPredicate != null) {
             try {
                 return resultRetryPredicate.test(methodResult);
             } catch (ClassCastException e) {
                 Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
-                throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass,e);
+                throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
             }
         }
 
+        // 没有抛出异常，也没走结果重试判断， 则停止重试
         return false;
     }
 
@@ -96,9 +132,9 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     protected Predicate<Object> getPredicateStrategy(FastRetry retryAnnotation) {
         Predicate<Object> predicate = null;
-        if (retryAnnotation.retryStrategy().length > 0){
+        if (retryAnnotation.retryStrategy().length > 0) {
             Class<? extends Predicate<?>> retryStrategy = retryAnnotation.retryStrategy()[0];
-            if (beanFactory != null){
+            if (beanFactory != null) {
                 try {
                     predicate = (Predicate<Object>) beanFactory.getBean(retryStrategy);
                 } catch (Exception e) {
@@ -106,9 +142,9 @@ public class RetryAnnotationTask implements RetryTask<Object> {
                 }
             }
 
-            if (predicate == null){
+            if (predicate == null) {
                 try {
-                    predicate = (Predicate<Object>)retryStrategy.newInstance();
+                    predicate = (Predicate<Object>) retryStrategy.newInstance();
                 } catch (InstantiationException e) {
                     throw new RuntimeException(e);
                 } catch (IllegalAccessException e) {
@@ -117,5 +153,29 @@ public class RetryAnnotationTask implements RetryTask<Object> {
             }
         }
         return predicate;
+    }
+
+    private FastRetryMethodInterceptor getFastRetryMethodInterceptor(FastRetry fastRetry) {
+        if (fastRetry.interceptor() == null || fastRetry.interceptor().length == 0) {
+            return null;
+        }
+        Class<? extends FastRetryMethodInterceptor> beanClass = fastRetry.interceptor()[0];
+        FastRetryMethodInterceptor bean = getBeanSafe(beanClass);
+        if (bean != null) {
+            return bean;
+        }
+        try {
+            return beanClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> T getBeanSafe(Class<T> beanClass) {
+        try {
+            return beanFactory.getBean(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            return null;
+        }
     }
 }
