@@ -1,5 +1,7 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
+import com.burukeyou.retry.spring.annotations.EnableFastRetry;
+import com.burukeyou.retry.spring.annotations.FastRetry;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;

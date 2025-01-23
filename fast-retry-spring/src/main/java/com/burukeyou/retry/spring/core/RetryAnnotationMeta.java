@@ -1,5 +1,6 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
+import com.burukeyou.retry.spring.annotations.FastRetry;
 import lombok.Data;
 
 import java.lang.annotation.Annotation;

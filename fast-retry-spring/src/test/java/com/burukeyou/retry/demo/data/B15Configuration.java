@@ -3,7 +3,7 @@ package com.burukeyou.retry.demo.data;
 
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
-import com.burukeyou.retry.spring.EnableFastRetry;
+import com.burukeyou.retry.spring.annotations.EnableFastRetry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;

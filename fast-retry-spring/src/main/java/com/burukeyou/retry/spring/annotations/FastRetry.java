@@ -1,8 +1,10 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.annotations;
 
 
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
+import com.burukeyou.retry.spring.core.FastRetryAnnotationRetryTaskFactory;
 
 import java.lang.annotation.*;
 

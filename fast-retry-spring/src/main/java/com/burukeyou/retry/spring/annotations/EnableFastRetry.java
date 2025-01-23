@@ -1,6 +1,8 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.annotations;
 
 
+import com.burukeyou.retry.spring.core.FastRetryAdvisorConfiguration;
+import com.burukeyou.retry.spring.config.FastRetrySpringConfiguration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
@@ -13,7 +15,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @EnableAspectJAutoProxy(proxyTargetClass = false)
-@Import({FastRetryAdvisorConfiguration.class,FastRetrySpringConfiguration.class})
+@Import({FastRetryAdvisorConfiguration.class, FastRetrySpringConfiguration.class})
 @Documented
 public @interface EnableFastRetry {
 

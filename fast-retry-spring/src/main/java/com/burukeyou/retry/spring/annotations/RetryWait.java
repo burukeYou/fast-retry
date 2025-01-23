@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.annotations;
 
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;

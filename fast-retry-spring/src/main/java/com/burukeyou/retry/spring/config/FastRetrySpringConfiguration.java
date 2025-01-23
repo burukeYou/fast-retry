@@ -1,5 +1,7 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.config;
 
+import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
+import com.burukeyou.retry.spring.core.FastRetryAnnotationRetryTaskFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;

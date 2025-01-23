@@ -1,9 +1,11 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
 
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.support.FutureCallable;
 import com.burukeyou.retry.core.task.RetryTask;
+import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.annotations.RetryWait;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.util.Arrays;

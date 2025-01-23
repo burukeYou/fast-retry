@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.support;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;

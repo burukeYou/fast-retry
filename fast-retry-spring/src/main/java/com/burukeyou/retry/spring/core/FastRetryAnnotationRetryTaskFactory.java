@@ -1,6 +1,7 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
 import com.burukeyou.retry.core.task.RetryTask;
+import com.burukeyou.retry.spring.annotations.FastRetry;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
 

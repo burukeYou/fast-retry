@@ -1,8 +1,9 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.exceptions.FastRetryException;
+import com.burukeyou.retry.spring.annotations.FastRetry;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInterceptor;

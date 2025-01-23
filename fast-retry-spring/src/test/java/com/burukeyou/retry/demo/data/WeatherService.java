@@ -3,8 +3,8 @@ package com.burukeyou.retry.demo.data;
 
 import com.burukeyou.retry.core.FastRetryBuilder;
 import com.burukeyou.retry.core.RetryResultPolicy;
-import com.burukeyou.retry.spring.FastRetry;
-import com.burukeyou.retry.spring.RetryWait;
+import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.github.rholder.retry.*;
 import com.google.common.base.Predicates;
 import lombok.extern.slf4j.Slf4j;

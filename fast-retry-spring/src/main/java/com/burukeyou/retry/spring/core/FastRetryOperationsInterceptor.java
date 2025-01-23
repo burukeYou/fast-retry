@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring;
+package com.burukeyou.retry.spring.core;
 
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.task.RetryTask;
