@@ -28,7 +28,7 @@ public class RetryQueueTest  {
             }
 
             @Override
-            public boolean retry(long curRetryCount) {
+            public boolean retry(long curExecuteCount) {
                 return ++result < 5;
             }
 

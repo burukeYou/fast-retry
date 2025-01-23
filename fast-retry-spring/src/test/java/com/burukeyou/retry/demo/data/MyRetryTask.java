@@ -28,7 +28,7 @@ public class MyRetryTask implements RetryTask<String> {
 
 
     @Override
-    public boolean retry(long curRetryCount) {
+    public boolean retry(long curExecuteCount) {
         log.info("MyRetryTask-任务开始重试 taskName:{} i:{}",taskName,i);
         try {
             //Thread.sleep(500);

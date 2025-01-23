@@ -50,8 +50,6 @@ public class FastRetryAnnotationsTest extends BaseSpringTest {
     public void testFastRetryRetryStrategy() throws Exception {
         WeatherResult result = weatherService.getWeatherForTestRetryStrategy("北京");
         log.info("城市轮询结束 result:{}",result);
-
-        Thread.currentThread().join();
     }
 
     /**

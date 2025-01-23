@@ -144,7 +144,7 @@ public class FriendlyComparisonTest extends BaseSpringTest {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        int taskSize = 1;
+        int taskSize = 100;
 
         List<CompletableFuture<WeatherResult>> futures = new ArrayList<>();
         for (int i = 0; i < taskSize; i++) {

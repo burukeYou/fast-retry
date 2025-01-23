@@ -45,9 +45,9 @@ public class WeatherService {
 
     @FastRetry(retryWait = @RetryWait(delay = 2),exceptionRecover = false)
     public WeatherResult getWeatherForTestFastRetry(String cityName){
-        log.info("WeatherService进行重试  次数:{} 城市: {}",index,cityName);
+        //log.info("WeatherService进行重试  次数:{} 城市: {}",index,cityName);
         if (++index < 5 ){
-            log.info("模拟异常进行重试  {}",index);
+          //  log.info("模拟异常进行重试  {}",index);
             throw new RuntimeException("模拟异常进行重试");
         }
 
@@ -93,7 +93,7 @@ public class WeatherService {
             queueName = B15Configuration.USER_RETRY_QUEUE,
             retryWait = @RetryWait(delay = 2,timeUnit = TimeUnit.SECONDS),exceptionRecover = true,printExceptionLog = false)
     public CompletableFuture<WeatherResult> getFutureWeatherForCompare(String cityName){
-        log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
+        //log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
         WeatherResult weather = WeatherServer.getWeather(cityName);
         if (weather == null){
             //继续重试
