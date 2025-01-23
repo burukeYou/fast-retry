@@ -22,9 +22,13 @@ public class FastRetryAnnotationRetryTaskFactory implements AnnotationRetryTaskF
             try {
                 return invocation.proceed();
             } catch (Throwable e) {
-                throw new RuntimeException(e);
+                if (e instanceof Exception){
+                    throw (Exception) e;
+                }else {
+                    throw new RuntimeException(e);
+                }
             }
         };
-        return new RetryAnnotationTask(supplier,retry,beanFactory);
+        return new RetryAnnotationTask(supplier,retry,beanFactory,invocation);
     }
 }

@@ -3,7 +3,10 @@ package com.burukeyou.retry.spring.core;
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.exceptions.FastRetryException;
+import com.burukeyou.retry.core.support.FastRetryThreadFactory;
 import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.utils.SystemUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInterceptor;
@@ -18,7 +21,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class AnnotationAwareFastRetryInterceptor implements IntroductionInterceptor, BeanFactoryAware {
 
     private static RetryQueue defaultRetryQueue;
@@ -127,7 +134,13 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
         if (defaultRetryQueue == null){
             synchronized (AnnotationAwareFastRetryInterceptor.class){
                 if (defaultRetryQueue == null){
-                    defaultRetryQueue = new FastRetryQueue(8);
+                    int cpuCount = SystemUtil.CPU_COUNT;
+                    ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(cpuCount*2, cpuCount*2,
+                            60L, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<>(),
+                            new FastRetryThreadFactory("spring"));
+                    log.info("[fast-retry-spring] init default retry queue cpuSize:{}",cpuCount);
+                    defaultRetryQueue = new FastRetryQueue(poolExecutor);
                 }
             }
         }
