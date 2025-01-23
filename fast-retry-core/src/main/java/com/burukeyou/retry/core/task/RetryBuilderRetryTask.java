@@ -34,7 +34,7 @@ public class RetryBuilderRetryTask implements RetryTask<Object> {
 
 
     @Override
-    public boolean retry(long curRetryCount) throws Exception {
+    public boolean retry(long curExecuteCount) throws Exception {
         methodResult = runnable.call();
 
         if (resultRetryPredicate != null){
