@@ -62,13 +62,9 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     @Override
     public boolean retry(long curExecuteCount) throws Exception {
         FastRetryMethodInvocationImpl retryMethodInvocation = null;
-        boolean stopFlag = false;
         if (retryMethodInterceptor != null) {
             retryMethodInvocation = new FastRetryMethodInvocationImpl(curExecuteCount, methodInvocation);
-            stopFlag = retryMethodInterceptor.beforeExecute(retryMethodInvocation);
-            if (!stopFlag) {
-                return false;
-            }
+            retryMethodInterceptor.beforeExecute(retryMethodInvocation);
         }
 
         Exception exception = null;
@@ -78,21 +74,23 @@ public class RetryAnnotationTask implements RetryTask<Object> {
             exception = e;
         }
 
-        if (retryMethodInterceptor != null) {
-            stopFlag = retryMethodInterceptor.afterExecute(exception, methodResult, retryMethodInvocation);
-            if (!stopFlag) {
-                return false;
+        if (exception != null) {
+            if (retryMethodInterceptor != null) {
+                retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
             }
-        } else if (exception != null) {
             throw exception;
         }
 
-        if (resultRetryPredicate != null) {
-            try {
-                return resultRetryPredicate.test(methodResult);
-            } catch (ClassCastException e) {
-                Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
-                throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
+        if (retryMethodInterceptor != null) {
+            retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
+        }else {
+            if (resultRetryPredicate != null) {
+                try {
+                    return resultRetryPredicate.test(methodResult);
+                } catch (ClassCastException e) {
+                    Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
+                    throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
+                }
             }
         }
 

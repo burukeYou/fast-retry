@@ -82,7 +82,7 @@ public @interface FastRetry {
      * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
      * but no matter how you set it up,it will print the last time exception log
      */
-     boolean printExceptionLog() default false;
+     boolean printExceptionLog() default true;
 
     /**
      *  use custom result retry strategy,
@@ -95,7 +95,7 @@ public @interface FastRetry {
     /**
      *  Retry Interceptor
      */
-    Class<? extends FastRetryMethodInterceptor>[] interceptor() default {DefaultFastRetryMethodInterceptor.class};
+    Class<? extends FastRetryMethodInterceptor>[] interceptor() default {};
 
     /**
      * Specify the factory bean for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory

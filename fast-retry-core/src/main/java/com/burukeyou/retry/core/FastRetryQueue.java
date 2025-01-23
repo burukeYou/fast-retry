@@ -190,7 +190,9 @@ public class FastRetryQueue implements RetryQueue {
             } catch (Exception e) {
                 lastException = e;
                 if (task.printExceptionLog()) {
-                    log.info("", e);
+                    if (count != 1){
+                        log.info("[fast-retry-queue] 重试任务执行异常，当前重试次数[{}]", count-1,e);
+                    }
                 }
                 if (!task.retryIfException()) {
                     return false;

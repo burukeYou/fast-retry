@@ -8,23 +8,19 @@ import org.springframework.stereotype.Component;
  * @author caizhihao
  */
 @Slf4j
-@Component
-public class DefaultFastRetryMethodInterceptor implements FastRetryMethodInterceptor {
+//@Component
+public class DefaultFastRetryMethodInterceptor implements FastRetryMethodInterceptor<Object> {
 
     @Override
-    public boolean beforeExecute(FastRetryMethodInvocation invocation) throws Exception {
+    public void beforeExecute(FastRetryMethodInvocation invocation) throws Exception {
         invocation.attachmentMap().put(INNER_USE_KEY,System.currentTimeMillis());
-        return true;
     }
 
     @Override
-    public boolean afterExecute(Exception exception, Object result, FastRetryMethodInvocation invocation) throws Exception {
-        if (exception != null) {
+    public void afterExecuteFail(Exception exception, FastRetryMethodInvocation invocation) throws Exception {
             long startTime =  (long)invocation.attachmentMap().get(INNER_USE_KEY);
             long costTime = System.currentTimeMillis() - startTime;
-            log.info("{} 方法执行失败准备开始重试 当前重试次数: {} 耗时: {}",invocation.getMethodAbsoluteName(),invocation.getCurExecuteCount(),costTime,exception);
-            throw exception;
-        }
-        return true;
+            log.info("{} 方法执行异常准备开始重试 当前重试次数: {} 耗时: {}",invocation.getMethodAbsoluteName(),invocation.getCurExecuteCount(),costTime,exception);
     }
+
 }

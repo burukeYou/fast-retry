@@ -9,24 +9,33 @@ import com.burukeyou.retry.spring.support.FastRetryMethodInvocation;
  * @author  caizhihao
  */
 
-public interface FastRetryMethodInterceptor {
+public interface FastRetryMethodInterceptor<T>  {
 
     String INNER_USE_KEY = "INNER_USE_KEY";
 
     /**
-     * Execute before retrying
+     * Execute before retry
      * @param invocation                proxy method
-     * @return                          if true continue to execute , otherwise stop to execute
+     * @return                          if true continue to execute ,  or else stop to execute
      */
-    boolean beforeExecute(FastRetryMethodInvocation invocation) throws Exception;
+    default void beforeExecute(FastRetryMethodInvocation invocation) throws Exception{}
 
     /**
-     * Execute after retrying
+     * Execute after retry fail
      * @param exception                 the method execute exception
-     * @param result                    the method execute result
      * @param invocation                proxy method
-     * @return                          if true continue to execute , otherwise stop to execute
      */
-    boolean afterExecute(Exception exception, Object result, FastRetryMethodInvocation invocation) throws Exception;
+    default void afterExecuteFail(Exception exception, FastRetryMethodInvocation invocation) throws Exception {
+    }
+
+    /**
+     * Execute after retry success
+     * @param result            method return value
+     * @param invocation        proxy method
+     * @return                  if true continue to retry invoke ,  or else stop retry invoke
+     */
+    default boolean afterExecuteSuccess(T result,FastRetryMethodInvocation invocation){
+        return false;
+    }
 
 }
