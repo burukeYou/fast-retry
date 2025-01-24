@@ -1,6 +1,6 @@
 package com.burukeyou.retry.core.task;
 
-import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import lombok.Data;
 
 import java.util.List;

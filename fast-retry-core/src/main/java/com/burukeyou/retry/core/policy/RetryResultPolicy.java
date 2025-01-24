@@ -1,16 +1,18 @@
-package com.burukeyou.retry.core;
+package com.burukeyou.retry.core.policy;
 
 import java.util.function.Predicate;
+
+import com.burukeyou.retry.core.policy.RetryPolicy;
 
 /**
  * Retry result policy
  *
  * @author caizhihao
  */
-public interface RetryResultPolicy<T> extends Predicate<T> {
+public interface RetryResultPolicy<T> extends Predicate<T>,  RetryPolicy {
 
     /**
-     * whether to continue retrying
+     * whether to continue retrying,
      * @param t        the result of the retry
      * @return         true if continue retrying
      */

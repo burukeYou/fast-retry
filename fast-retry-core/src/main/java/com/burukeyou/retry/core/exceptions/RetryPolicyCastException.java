@@ -1,6 +1,6 @@
 package com.burukeyou.retry.core.exceptions;
 
-import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 
 /**
  *  When using a custom result retry strategy {@link RetryResultPolicy},

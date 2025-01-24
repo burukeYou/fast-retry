@@ -1,5 +1,6 @@
 package com.burukeyou.retry.core;
 
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.core.task.RetryTaskContext;
 
 import java.util.Arrays;
