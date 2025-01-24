@@ -11,6 +11,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Setter
 public class FastRetryOperationsInterceptor  implements MethodInterceptor {
@@ -41,7 +42,7 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
         }
 
         CompletableFuture<Object> future = retryQueue.submit(retryTask);
-        if (CompletableFuture.class.isAssignableFrom(returnType)){
+        if (Future.class.isAssignableFrom(returnType)){
             return future;
         }else {
             try {
@@ -51,8 +52,9 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof RuntimeException){
                     throw  e.getCause();
+                }else {
+                    throw e;
                 }
-                throw e;
             }
         }
     }

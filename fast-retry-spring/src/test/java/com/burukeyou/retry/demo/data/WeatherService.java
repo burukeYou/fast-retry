@@ -2,7 +2,7 @@ package com.burukeyou.retry.demo.data;
 
 
 import com.burukeyou.retry.core.FastRetryBuilder;
-import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.github.rholder.retry.*;
@@ -43,7 +43,7 @@ public class WeatherService {
         }
     }
 
-    @FastRetry(retryWait = @RetryWait(delay = 2),exceptionRecover = false)
+    @FastRetry(retryWait = @RetryWait(delay = 2),briefErrorLog = true)
     public WeatherResult getWeatherForTestFastRetry(String cityName){
         //log.info("WeatherService进行重试  次数:{} 城市: {}",index,cityName);
         if (++index < 5 ){
@@ -91,7 +91,7 @@ public class WeatherService {
     @FastRetry(
             maxAttempts = 100,
             queueName = B15Configuration.USER_RETRY_QUEUE,
-            retryWait = @RetryWait(delay = 2,timeUnit = TimeUnit.SECONDS),exceptionRecover = true,printExceptionLog = false)
+            retryWait = @RetryWait(delay = 2,timeUnit = TimeUnit.SECONDS))
     public CompletableFuture<WeatherResult> getFutureWeatherForCompare(String cityName){
         //log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
         WeatherResult weather = WeatherServer.getWeather(cityName);

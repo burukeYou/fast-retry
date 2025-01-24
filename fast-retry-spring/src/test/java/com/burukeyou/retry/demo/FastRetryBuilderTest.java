@@ -2,7 +2,7 @@ package com.burukeyou.retry.demo;
 
 import com.burukeyou.retry.core.FastRetryBuilder;
 import com.burukeyou.retry.core.FastRetryer;
-import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

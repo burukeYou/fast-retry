@@ -2,10 +2,10 @@ package com.burukeyou.retry.core.policy;
 
 import java.util.function.Predicate;
 
-import com.burukeyou.retry.core.policy.RetryPolicy;
 
 /**
- * Retry result policy
+ * Retry result policy,
+ *  this policy can determine whether a retry is needed based on the results
  *
  * @author caizhihao
  */

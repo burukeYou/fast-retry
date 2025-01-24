@@ -2,23 +2,30 @@ package com.burukeyou.retry.spring.core;
 
 
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
+import com.burukeyou.retry.core.policy.RetryPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.core.support.FutureCallable;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
-import com.burukeyou.retry.spring.interceptor.FastRetryMethodInterceptor;
+import com.burukeyou.retry.spring.core.policy.LogEnum;
+import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
 import com.burukeyou.retry.spring.support.FastRetryMethodInvocationImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-
+@Slf4j
+@SuppressWarnings("ALL")
 public class RetryAnnotationTask implements RetryTask<Object> {
 
     private final Callable<Object> runnable;
@@ -30,7 +37,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     private final BeanFactory beanFactory;
 
-    private FastRetryMethodInterceptor retryMethodInterceptor;
+    private RetryInterceptorPolicy retryMethodInterceptor;
 
     private MethodInvocation methodInvocation;
 
@@ -61,10 +68,118 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     @Override
     public boolean retry(long curExecuteCount) throws Exception {
-        FastRetryMethodInvocationImpl retryMethodInvocation = null;
-        if (retryMethodInterceptor != null) {
-            retryMethodInvocation = new FastRetryMethodInvocationImpl(curExecuteCount, methodInvocation);
-            retryMethodInterceptor.beforeExecute(retryMethodInvocation);
+        long start = 0;
+        try {
+            if(!LogEnum.NOT.equals(retry.errLog())){
+                start = System.currentTimeMillis();
+            }
+            return doRetry(curExecuteCount);
+        } catch (Exception e) {
+            printLogInfo(curExecuteCount,start,retry.errLog(),e);
+            throw e;
+        }
+    }
+
+    private void printLogInfo(long curExecuteCount,long start,LogEnum logEnum,Exception exception) {
+        if (logEnum.equals(LogEnum.NOT)) {
+            return;
+        }
+        long costTime = System.currentTimeMillis() - start;
+        if (logEnum.equals(LogEnum.EVERY)) {
+            printLog(curExecuteCount, costTime,exception);
+            return;
+        };
+
+        if (logEnum.equals(LogEnum.DEFAULT)) {
+            int maxAttempts = retry.maxAttempts();
+            if(maxAttempts == 0){
+                // 重试次数为0，不打印
+                return;
+            }
+            boolean isLogFlag = false;
+            if(maxAttempts == 1){
+                // 重试次数为1，打印本次
+                isLogFlag = true;
+            }else if(maxAttempts == 2){
+                // 重试次数为2, 每次都打
+                isLogFlag = true;
+            }else {
+                // 重试次数大于2，打印前2次，最后1次
+                isLogFlag = isPrintLogFlag(curExecuteCount,LogEnum.PRE_2_LAST_1);
+            }
+            if (isLogFlag) {
+                printLog(curExecuteCount, costTime,exception);
+            }
+            return;
+        }
+
+        boolean isLogFlag = isPrintLogFlag(curExecuteCount, logEnum);
+        if (isLogFlag) {
+            printLog(curExecuteCount, costTime,exception);
+        }
+    }
+
+    private boolean isPrintLogFlag(long curExecuteCount, LogEnum logEnum) {
+        boolean isLogFlag = false;
+        Integer preN = logEnum.getPreN();
+        Integer lastN = logEnum.getLastN();
+        if (preN == null && lastN == null) {
+            return false;
+        }
+
+        int executeCount =  retry.maxAttempts() + 1;
+        if (preN == null) {
+            preN = 0;
+        }
+        if (lastN == null){
+            lastN = executeCount;
+        }
+        if (preN + lastN >= executeCount) {
+            isLogFlag = true;
+        }else {
+            // [start, pre, last, end] not print [pre,last]
+            isLogFlag = !(curExecuteCount > preN && curExecuteCount <= (executeCount- lastN));
+        }
+        return isLogFlag;
+    }
+
+    private void printLog(long curExecuteCount, long costTime,Exception info) {
+        if (!retry.briefErrorLog() || info.getStackTrace().length <= 3){
+            log.info("[fast-retry-spring] 重试任务执行发生异常 执行方法:{}, 当前执行次数:{} 耗时:{}",getMethodAbsoluteName(), curExecuteCount, costTime,info);
+            return;
+        }
+
+        String errInfo = ExceptionUtils.getStackTrace(info);
+        log.info("[fast-retry-spring] 重试任务执行发生异常 执行方法:{}, 当前执行次数:{} 耗时:{} \n{}",getMethodAbsoluteName(), curExecuteCount, costTime,info,errInfo);
+
+    }
+
+    public String getMethodAbsoluteName() {
+        Method method = methodInvocation.getMethod();
+        return method.getDeclaringClass().getName() + "." + method.getName();
+    }
+
+    private boolean doRetry(long curExecuteCount) throws Exception {
+        Class<? extends RetryPolicy> retryPolicyClass = getRetryPolicyClass();
+        if (retryPolicyClass == null) {
+            return retryDoForNotRetryPolicy();
+        }
+
+        if (RetryResultPolicy.class.isAssignableFrom(retryPolicyClass)) {
+            return retryDoForResultRetryPolicy();
+        }
+
+        if (RetryInterceptorPolicy.class.isAssignableFrom(retryPolicyClass)) {
+            return retryDoForInterceptorPolicy(curExecuteCount);
+        }
+
+        return retryDoForNotRetryPolicy();
+    }
+
+    private boolean retryDoForInterceptorPolicy(long curExecuteCount) throws Exception {
+        FastRetryMethodInvocationImpl retryMethodInvocation = new FastRetryMethodInvocationImpl(curExecuteCount,retry, methodInvocation);
+        if (!retryMethodInterceptor.beforeExecute(retryMethodInvocation)){
+            return false;
         }
 
         Exception exception = null;
@@ -73,28 +188,28 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         } catch (Exception e) {
             exception = e;
         }
-
-        if (exception != null) {
-            if (retryMethodInterceptor != null) {
-                retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
-            }
-            throw exception;
-        }
-
-        if (retryMethodInterceptor != null) {
-            retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
+        if (exception == null) {
+            return retryMethodInterceptor.afterExecuteSuccess(methodResult, retryMethodInvocation);
         }else {
-            if (resultRetryPredicate != null) {
-                try {
-                    return resultRetryPredicate.test(methodResult);
-                } catch (ClassCastException e) {
-                    Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
-                    throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
-                }
+            return retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
+        }
+    }
+
+    private boolean retryDoForResultRetryPolicy() throws Exception {
+        methodResult = runnable.call();
+        if (resultRetryPredicate != null) {
+            try {
+                return resultRetryPredicate.test(methodResult);
+            } catch (ClassCastException e) {
+                Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
+                throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
             }
         }
+        return false;
+    }
 
-        // 没有抛出异常，也没走结果重试判断， 则停止重试
+    private boolean retryDoForNotRetryPolicy() throws Exception {
+        methodResult = runnable.call();
         return false;
     }
 
@@ -125,48 +240,32 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     @Override
     public boolean printExceptionLog() {
-        return retry.printExceptionLog();
+        return false;
     }
 
     protected Predicate<Object> getPredicateStrategy(FastRetry retryAnnotation) {
         Predicate<Object> predicate = null;
-        if (retryAnnotation.retryStrategy().length > 0) {
-            Class<? extends Predicate<?>> retryStrategy = retryAnnotation.retryStrategy()[0];
-            if (beanFactory != null) {
-                try {
-                    predicate = (Predicate<Object>) beanFactory.getBean(retryStrategy);
-                } catch (Exception e) {
-                    predicate = null;
-                }
-            }
-
-            if (predicate == null) {
-                try {
-                    predicate = (Predicate<Object>) retryStrategy.newInstance();
-                } catch (InstantiationException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return predicate;
-    }
-
-    private FastRetryMethodInterceptor getFastRetryMethodInterceptor(FastRetry fastRetry) {
-        if (fastRetry.interceptor() == null || fastRetry.interceptor().length == 0) {
+        if (retryAnnotation.retryStrategy().length == 0) {
             return null;
         }
-        Class<? extends FastRetryMethodInterceptor> beanClass = fastRetry.interceptor()[0];
-        FastRetryMethodInterceptor bean = getBeanSafe(beanClass);
-        if (bean != null) {
-            return bean;
+        Class<? extends RetryPolicy> policyClass = retryAnnotation.retryStrategy()[0];
+        if (!Predicate.class.isAssignableFrom(policyClass)) {
+            return null;
         }
-        try {
-            return beanClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        Class<? extends Predicate<Object>> retryStrategy = (Class<? extends Predicate<Object>>) policyClass;
+        return getBeanOrNew(retryStrategy);
+    }
+
+    private RetryInterceptorPolicy getFastRetryMethodInterceptor(FastRetry fastRetry) {
+        if (fastRetry.retryStrategy().length == 0) {
+            return null;
         }
+        Class<? extends RetryPolicy> policyClass = fastRetry.retryStrategy()[0];
+        if (!RetryInterceptorPolicy.class.isAssignableFrom(policyClass)) {
+            return null;
+        }
+        Class<RetryInterceptorPolicy> beanClass = (Class<RetryInterceptorPolicy>) policyClass;
+        return getBeanOrNew(beanClass);
     }
 
     public <T> T getBeanSafe(Class<T> beanClass) {
@@ -176,4 +275,23 @@ public class RetryAnnotationTask implements RetryTask<Object> {
             return null;
         }
     }
+
+    public <T> T getBeanOrNew(Class<T> beanClass) {
+        T beanSafe = getBeanSafe(beanClass);
+        if (beanSafe == null) {
+            try {
+                return beanClass.newInstance();
+            } catch (InstantiationException   | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return beanSafe;
+    }
+
+    private Class<? extends RetryPolicy> getRetryPolicyClass() {
+        return retry.retryStrategy().length > 0 ?  retry.retryStrategy()[0] : null;
+    }
 }
+
+
+

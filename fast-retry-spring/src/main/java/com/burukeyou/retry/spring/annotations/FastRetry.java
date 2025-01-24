@@ -2,12 +2,12 @@ package com.burukeyou.retry.spring.annotations;
 
 
 import com.burukeyou.retry.core.RetryQueue;
-import com.burukeyou.retry.core.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.RetryPolicy;
+import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.FastRetryAnnotationRetryTaskFactory;
-import com.burukeyou.retry.spring.core.RetryAnnotationTask;
-import com.burukeyou.retry.spring.interceptor.DefaultFastRetryMethodInterceptor;
-import com.burukeyou.retry.spring.interceptor.FastRetryMethodInterceptor;
+import com.burukeyou.retry.spring.core.policy.LogEnum;
+import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
 
 import java.lang.annotation.*;
 
@@ -80,22 +80,28 @@ public @interface FastRetry {
 
     /**
      * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
-     * but no matter how you set it up,it will print the last time exception log
      */
-     boolean printExceptionLog() default true;
+    LogEnum errLog() default LogEnum.DEFAULT;
 
     /**
-     *  use custom result retry strategy,
-     *  this policy can determine whether a retry is needed based on the results
-     *
+     * Set whether to simplify the stack information of the printing exception,
+     * if so, only the first three lines of stack information will be printed,
+     * and if the first execution fails, this configuration will be ignored,
+     * and the complete exception information will still be printed
+     * @see #errLog()
+     */
+    boolean briefErrorLog() default false;;
+
+    /**
+     *  use custom  retry strategy,
+     *  <p>Currently, the following policies are supported:</p>
+     *  <ul>
+     *      <li>{@link RetryResultPolicy}</li>
+     *      <li>{@link RetryInterceptorPolicy}</li>
+     *  </ul>
      * @return the class of retry-result-policy
      */
-    Class<? extends RetryResultPolicy<?>>[] retryStrategy() default {};
-
-    /**
-     *  Retry Interceptor
-     */
-    Class<? extends FastRetryMethodInterceptor>[] interceptor() default {};
+    Class<? extends RetryPolicy>[] retryStrategy() default {};
 
     /**
      * Specify the factory bean for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory

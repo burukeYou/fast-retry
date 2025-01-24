@@ -99,7 +99,7 @@ public class FastRetryQueue implements RetryQueue {
         }
 
         if (exceptionRecover) {
-            log.info("", retryTaskException);
+            log.info("[fast-retry-queue] exception recover ", retryTaskException);
             completableFuture.complete(null);
         } else {
             completableFuture.completeExceptionally(retryTask.getLastException());

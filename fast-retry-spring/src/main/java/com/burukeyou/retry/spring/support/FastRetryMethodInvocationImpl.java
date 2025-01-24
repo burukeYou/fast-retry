@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.burukeyou.retry.spring.annotations.FastRetry;
 import lombok.Getter;
 import lombok.Setter;
 import org.aopalliance.intercept.MethodInvocation;
@@ -20,12 +21,20 @@ public class FastRetryMethodInvocationImpl implements FastRetryMethodInvocation 
     private final MethodInvocation methodInvocation;
 
     private final Map<String,Object> extMap;
+    private final FastRetry fastRetry;
 
-    public FastRetryMethodInvocationImpl(long curRetryCount, MethodInvocation methodInvocation) {
+    public FastRetryMethodInvocationImpl(long curRetryCount, FastRetry fastRetry,MethodInvocation methodInvocation) {
         this.curRetryCount = curRetryCount;
+        this.fastRetry = fastRetry;
         this.methodInvocation = methodInvocation;
         this.extMap = new HashMap<>();
     }
+
+    @Override
+    public long getMaxAttempts() {
+        return fastRetry.maxAttempts();
+    }
+
 
     @Override
     public long getCurExecuteCount() {
