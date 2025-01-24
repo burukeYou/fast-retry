@@ -160,15 +160,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     private boolean doRetry(long curExecuteCount) throws Exception {
-        RetryPolicy methodRetryPolicy = null;
-        Object[] arguments = methodInvocation.getArguments();
-        for (Object arg : arguments) {
-            if (arg != null && RetryPolicy.class.isAssignableFrom(arg.getClass())){
-                methodRetryPolicy = (RetryPolicy)arg;
-                break;
-            }
-        }
-
+        RetryPolicy methodRetryPolicy = findMethodParamRetryPolicy();
         Class<? extends RetryPolicy> retryPolicyClass = getRetryPolicyClass();
         if (methodRetryPolicy == null){
             if (retryPolicyClass == null) {
@@ -186,6 +178,18 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         }
 
         throw new IllegalArgumentException("Unsupported RetryPolicy type for " + methodRetryPolicy.getClass());
+    }
+
+    private RetryPolicy findMethodParamRetryPolicy() {
+        RetryPolicy methodRetryPolicy = null;
+        Object[] arguments = methodInvocation.getArguments();
+        for (Object arg : arguments) {
+            if (arg != null && RetryPolicy.class.isAssignableFrom(arg.getClass())){
+                methodRetryPolicy = (RetryPolicy)arg;
+                break;
+            }
+        }
+        return methodRetryPolicy;
     }
 
     private boolean retryDoForInterceptorPolicy(long curExecuteCount,RetryInterceptorPolicy<Object> policy) throws Exception {
