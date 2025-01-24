@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 @Slf4j
 @SuppressWarnings("ALL")
@@ -31,7 +30,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     private final FastRetry retry;
 
     private Object methodResult;
-    private final Predicate<Object> resultRetryPredicate;
+    private final RetryResultPolicy<Object> resultRetryPredicate;
 
     private final BeanFactory beanFactory;
 
@@ -161,25 +160,37 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     private boolean doRetry(long curExecuteCount) throws Exception {
+        RetryPolicy methodRetryPolicy = null;
+        Object[] arguments = methodInvocation.getArguments();
+        for (Object arg : arguments) {
+            if (arg != null && RetryPolicy.class.isAssignableFrom(arg.getClass())){
+                methodRetryPolicy = (RetryPolicy)arg;
+                break;
+            }
+        }
+
         Class<? extends RetryPolicy> retryPolicyClass = getRetryPolicyClass();
-        if (retryPolicyClass == null) {
-            return retryDoForNotRetryPolicy();
+        if (methodRetryPolicy == null){
+            if (retryPolicyClass == null) {
+                return retryDoForNotRetryPolicy();
+            }
+            methodRetryPolicy = RetryResultPolicy.class.isAssignableFrom(retryPolicyClass) ? resultRetryPredicate : retryMethodInterceptor;
         }
 
-        if (RetryResultPolicy.class.isAssignableFrom(retryPolicyClass)) {
-            return retryDoForResultRetryPolicy();
+        if (RetryResultPolicy.class.isAssignableFrom(methodRetryPolicy.getClass())) {
+            return retryDoForResultRetryPolicy((RetryResultPolicy<Object>)methodRetryPolicy);
         }
 
-        if (RetryInterceptorPolicy.class.isAssignableFrom(retryPolicyClass)) {
-            return retryDoForInterceptorPolicy(curExecuteCount);
+        if (RetryInterceptorPolicy.class.isAssignableFrom(methodRetryPolicy.getClass())) {
+            return retryDoForInterceptorPolicy(curExecuteCount,(RetryInterceptorPolicy<Object>)methodRetryPolicy);
         }
 
-        return retryDoForNotRetryPolicy();
+        throw new IllegalArgumentException("Unsupported RetryPolicy type for " + methodRetryPolicy.getClass());
     }
 
-    private boolean retryDoForInterceptorPolicy(long curExecuteCount) throws Exception {
+    private boolean retryDoForInterceptorPolicy(long curExecuteCount,RetryInterceptorPolicy<Object> policy) throws Exception {
         FastRetryMethodInvocationImpl retryMethodInvocation = new FastRetryMethodInvocationImpl(curExecuteCount,retry, methodInvocation);
-        if (!retryMethodInterceptor.beforeExecute(retryMethodInvocation)){
+        if (!policy.beforeExecute(retryMethodInvocation)){
             return false;
         }
 
@@ -190,17 +201,17 @@ public class RetryAnnotationTask implements RetryTask<Object> {
             exception = e;
         }
         if (exception == null) {
-            return retryMethodInterceptor.afterExecuteSuccess(methodResult, retryMethodInvocation);
+            return policy.afterExecuteSuccess(methodResult, retryMethodInvocation);
         }else {
-            return retryMethodInterceptor.afterExecuteFail(exception, retryMethodInvocation);
+            return policy.afterExecuteFail(exception, retryMethodInvocation);
         }
     }
 
-    private boolean retryDoForResultRetryPolicy() throws Exception {
+    private boolean retryDoForResultRetryPolicy(RetryResultPolicy<Object> policy) throws Exception {
         methodResult = runnable.call();
-        if (resultRetryPredicate != null) {
+        if (policy != null) {
             try {
-                return resultRetryPredicate.test(methodResult);
+                return policy.test(methodResult);
             } catch (ClassCastException e) {
                 Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
                 throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
@@ -244,16 +255,16 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         return false;
     }
 
-    protected Predicate<Object> getPredicateStrategy(FastRetry retryAnnotation) {
-        Predicate<Object> predicate = null;
+    protected RetryResultPolicy<Object> getPredicateStrategy(FastRetry retryAnnotation) {
+        RetryResultPolicy<Object> predicate = null;
         if (retryAnnotation.retryStrategy().length == 0) {
             return null;
         }
         Class<? extends RetryPolicy> policyClass = retryAnnotation.retryStrategy()[0];
-        if (!Predicate.class.isAssignableFrom(policyClass)) {
+        if (!RetryResultPolicy.class.isAssignableFrom(policyClass)) {
             return null;
         }
-        Class<? extends Predicate<Object>> retryStrategy = (Class<? extends Predicate<Object>>) policyClass;
+        Class<? extends RetryResultPolicy<Object>> retryStrategy = (Class<? extends RetryResultPolicy<Object>>) policyClass;
         return getBeanOrNew(retryStrategy);
     }
 
