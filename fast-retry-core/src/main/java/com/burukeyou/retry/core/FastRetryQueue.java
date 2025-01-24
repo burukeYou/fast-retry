@@ -173,7 +173,7 @@ public class FastRetryQueue implements RetryQueue {
                 return false;
             }
             long maxTimes = task.attemptMaxTimes();
-            if (maxTimes > 0 && count > maxTimes) {
+            if (maxTimes >= 0 && count > maxTimes) {
                 lastException = new FastRetryTimeOutException("The maximum retry count has been exceeded after " + maxTimes + " times. Stop retry",lastException);
                 return false;
             }else {
@@ -192,6 +192,11 @@ public class FastRetryQueue implements RetryQueue {
                 if (task.printExceptionLog()) {
                     log.info("[fast-retry-queue] 重试任务发生异常准备重试，当前执行次数[{}]", count-1,e);
                 }
+                if (maxTimes == 0){
+                    // not need retry
+                    return false;
+                }
+
                 if (!task.retryIfException()) {
                     return false;
                 }
