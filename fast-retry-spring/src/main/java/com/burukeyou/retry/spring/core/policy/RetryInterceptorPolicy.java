@@ -12,7 +12,7 @@ import com.burukeyou.retry.spring.support.FastRetryMethodInvocation;
 public interface RetryInterceptorPolicy<T> extends RetryPolicy {
 
     /**
-     * Execute before retry
+     * Before each retry execution
      *
      * @param invocation proxy method
      * @return if true continue to execute ,  or else stop to execute
@@ -22,7 +22,7 @@ public interface RetryInterceptorPolicy<T> extends RetryPolicy {
     }
 
     /**
-     * Execute after retry fail
+     * After each failed retry execution
      *
      * @param exception  the method execute exception
      * @param invocation proxy method
@@ -32,7 +32,7 @@ public interface RetryInterceptorPolicy<T> extends RetryPolicy {
     }
 
     /**
-     * Execute after retry success
+     * After each successful retry execution
      *
      * @param methodReturnValue method return value
      * @param invocation        proxy method

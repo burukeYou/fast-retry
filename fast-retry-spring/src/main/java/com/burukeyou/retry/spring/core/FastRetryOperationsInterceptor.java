@@ -17,6 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * @author  caizhihao
+ */
 @Setter
 public class FastRetryOperationsInterceptor  implements MethodInterceptor {
 

@@ -4,6 +4,7 @@ import com.burukeyou.retry.spring.annotations.FastRetry;
 import lombok.Getter;
 
 /**
+ * print exception log strategy
  * @author caizhihao
  */
 @Getter
