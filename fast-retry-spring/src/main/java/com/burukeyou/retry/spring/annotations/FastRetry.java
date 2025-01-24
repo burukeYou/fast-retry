@@ -38,12 +38,15 @@ public @interface FastRetry {
     int maxAttempts() default 3;
 
     /**
-     * Specify the RetryWait properties for retrying this operation. The default is a simple
-     * {@link RetryWait} specification with no properties - see its documentation for
-     * defaults.
-     * @return a RetryWait specification
+     * How long will it take to start the next retry, equals to {@link #delay},
+     * If both are configured, retryWait() will take effect first
      */
-    RetryWait retryWait() default @RetryWait();
+    RetryWait[] retryWait() default {};
+
+    /**
+     * How long will it take to start the next retry, unit is MILLISECONDS
+     */
+    long delay() default 1000;
 
     /**
      * Use the bean class of the specified retry queue
@@ -90,7 +93,7 @@ public @interface FastRetry {
      * and the complete exception information will still be printed
      * @see #errLog()
      */
-    boolean briefErrorLog() default false;;
+    boolean briefErrorLog() default false;
 
     /**
      *  use custom  retry strategy,
