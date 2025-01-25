@@ -2,8 +2,7 @@ package com.burukeyou.retry.spring.core;
 
 import com.burukeyou.retry.core.FastRetryQueue;
 import com.burukeyou.retry.core.RetryQueue;
-import com.burukeyou.retry.core.exceptions.FastRetryException;
-import com.burukeyou.retry.core.support.FastRetryThreadFactory;
+import com.burukeyou.retry.core.support.FastRetryThreadPool;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.utils.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -111,39 +109,18 @@ public class AnnotationAwareFastRetryInterceptor implements IntroductionIntercep
     }
 
     private RetryQueue getRetryQueue(FastRetry retry) {
-        RetryQueue bean = null;
-        try {
-            String queueName = retry.queueName();
-            if (queueName != null && !queueName.isEmpty()){
-                bean =  beanFactory.getBean(queueName, RetryQueue.class);
-                return bean;
-            }
-
-            if (retry.queueClass() != null && retry.queueClass().length != 0){
-                bean = beanFactory.getBean(retry.queueClass()[0]);
-            }else {
-                bean = getDefaultRetryQueue();
-            }
-        } catch (BeansException e) {
-            throw new FastRetryException("can not find custom retry queue bean from spring context",e);
+        if (defaultRetryQueue != null) {
+            return defaultRetryQueue;
         }
-        return bean;
-    }
-
-    private RetryQueue getDefaultRetryQueue() {
-        if (defaultRetryQueue == null){
-            synchronized (AnnotationAwareFastRetryInterceptor.class){
-                if (defaultRetryQueue == null){
-                    int cpuCount = SystemUtil.CPU_COUNT;
-                    ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(cpuCount*2, cpuCount*2,
-                            60L, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<>(),
-                            new FastRetryThreadFactory("spring"));
-                    log.info("[fast-retry-spring] init default retry queue cpuSize:{}",cpuCount);
-                    defaultRetryQueue = new FastRetryQueue(poolExecutor);
-                }
+        synchronized (RetryQueue.class) {
+            if (defaultRetryQueue == null) {
+                int cpuCount = SystemUtil.CPU_COUNT;
+                log.info("[fast-retry-spring] init default retry queue cpuSize:{} ", cpuCount);
+                ExecutorService executorService = new FastRetryThreadPool(4, cpuCount * 4, 60, TimeUnit.SECONDS);
+                defaultRetryQueue =new FastRetryQueue(executorService);
             }
         }
         return defaultRetryQueue;
     }
+
 }

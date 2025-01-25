@@ -1,7 +1,6 @@
 package com.burukeyou.retry.spring.annotations;
 
 
-import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
@@ -23,15 +22,6 @@ import java.lang.annotation.*;
 //@Inherited
 public @interface FastRetry {
 
-    /***
-     * Use the BeanName of the specified retry queue
-     *          If not specified, get it from spring-context according to the  value of {@link FastRetry#queueClass()}
-     *          If none of them are configured, use the default built-in retry queue
-     *
-     * @return   the name of retry-queue
-     */
-    String queueName() default "";
-
     /**
      * @return the maximum number of attempts , if -1, it means unlimited
      */
@@ -47,12 +37,6 @@ public @interface FastRetry {
      * How long will it take to start the next retry, unit is MILLISECONDS
      */
     long delay() default 1000;
-
-    /**
-     * Use the bean class of the specified retry queue
-     * @return the class of retry-queue
-     */
-    Class<? extends RetryQueue>[] queueClass() default {};
 
     /**
      * Flag to say that whether try again when an exception occurs
