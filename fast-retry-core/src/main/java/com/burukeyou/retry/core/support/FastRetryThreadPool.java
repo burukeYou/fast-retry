@@ -22,6 +22,14 @@ public class FastRetryThreadPool extends ThreadPoolExecutor {
                                int maximumPoolSize,
                                long keepAliveTime,
                                TimeUnit unit,
+                               ThreadFactory threadFactory) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, null, threadFactory, rejectedExecutionHandler);
+    }
+
+    public FastRetryThreadPool(int corePoolSize,
+                               int maximumPoolSize,
+                               long keepAliveTime,
+                               TimeUnit unit,
                                Integer workQueueSize) {
         this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueueSize, new FastRetryThreadFactory("spring"), rejectedExecutionHandler);
     }

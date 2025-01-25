@@ -4,7 +4,7 @@ package com.burukeyou.retry.core;
 import com.burukeyou.retry.core.exceptions.FastRetryTimeOutException;
 import com.burukeyou.retry.core.exceptions.RetryFutureInterruptedException;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
-import com.burukeyou.retry.core.support.FastRetryThreadFactory;
+import com.burukeyou.retry.core.support.FastRetryThreadPool;
 import com.burukeyou.retry.core.support.RetryQueueFuture;
 import com.burukeyou.retry.core.task.DelayedTask;
 import com.burukeyou.retry.core.task.RetryTask;
@@ -38,8 +38,9 @@ public class FastRetryQueue implements RetryQueue {
     }
 
     public FastRetryQueue(int corePoolSize) {
-        this(Executors.newFixedThreadPool(corePoolSize, new FastRetryThreadFactory("queue")));
+        this(new FastRetryThreadPool(corePoolSize,corePoolSize * 4,60, TimeUnit.SECONDS));
     }
+
 
     private void start() {
         new Thread(() -> {
