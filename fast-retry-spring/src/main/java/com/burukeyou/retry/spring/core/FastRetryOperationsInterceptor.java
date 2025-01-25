@@ -45,7 +45,7 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
     }
 
     private AnnotationRetryTaskFactory<Annotation> getRetryTaskFactory(RetryAnnotationMeta retryAnnotation) {
-        return beanFactory.getBean(retryAnnotation.getFastRetry().factory());
+        return beanFactory.getBean(retryAnnotation.getFastRetry().taskFactory());
     }
 
     @Override

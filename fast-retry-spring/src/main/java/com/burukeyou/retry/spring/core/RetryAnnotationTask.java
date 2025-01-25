@@ -294,10 +294,10 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     protected RetryResultPolicy<Object> getPredicateStrategy(FastRetry retryAnnotation) {
         RetryResultPolicy<Object> predicate = null;
-        if (retryAnnotation.retryStrategy().length == 0) {
+        if (retryAnnotation.policy().length == 0) {
             return null;
         }
-        Class<? extends RetryPolicy> policyClass = retryAnnotation.retryStrategy()[0];
+        Class<? extends RetryPolicy> policyClass = retryAnnotation.policy()[0];
         if (!RetryResultPolicy.class.isAssignableFrom(policyClass)) {
             return null;
         }
@@ -306,10 +306,10 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     private RetryInterceptorPolicy<Object> getFastRetryMethodInterceptor(FastRetry fastRetry) {
-        if (fastRetry.retryStrategy().length == 0) {
+        if (fastRetry.policy().length == 0) {
             return null;
         }
-        Class<? extends RetryPolicy> policyClass = fastRetry.retryStrategy()[0];
+        Class<? extends RetryPolicy> policyClass = fastRetry.policy()[0];
         if (!RetryInterceptorPolicy.class.isAssignableFrom(policyClass)) {
             return null;
         }
@@ -338,7 +338,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     private Class<? extends RetryPolicy> getRetryPolicyClass() {
-        return retry.retryStrategy().length > 0 ?  retry.retryStrategy()[0] : null;
+        return retry.policy().length > 0 ?  retry.policy()[0] : null;
     }
 }
 

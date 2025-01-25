@@ -36,7 +36,7 @@ public @interface FastRetry {
     /**
      * How long will it take to start the next retry, unit is MILLISECONDS
      */
-    long delay() default 1000;
+    long delay() default 500;
 
     /**
      * Flag to say that whether try again when an exception occurs
@@ -88,11 +88,11 @@ public @interface FastRetry {
      *  </ul>
      * @return the class of retry-result-policy
      */
-    Class<? extends RetryPolicy>[] retryStrategy() default {};
+    Class<? extends RetryPolicy>[] policy() default {};
 
     /**
      * Specify the factory bean for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory
      */
-    Class<? extends AnnotationRetryTaskFactory> factory() default FastRetryAnnotationRetryTaskFactory.class;
+    Class<? extends AnnotationRetryTaskFactory> taskFactory() default FastRetryAnnotationRetryTaskFactory.class;
 
 }
