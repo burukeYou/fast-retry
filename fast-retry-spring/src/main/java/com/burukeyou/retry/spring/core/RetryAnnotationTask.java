@@ -4,12 +4,13 @@ package com.burukeyou.retry.spring.core;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.policy.RetryResultPolicy;
-import com.burukeyou.retry.core.support.FutureCallable;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
 import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
+import com.burukeyou.retry.spring.support.FastFutureCallable;
+import com.burukeyou.retry.spring.support.FastRetryFuture;
 import com.burukeyou.retry.spring.support.FastRetryMethodInvocationImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
@@ -19,14 +20,16 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @SuppressWarnings("ALL")
 public class RetryAnnotationTask implements RetryTask<Object> {
 
-    private final Callable<Object> runnable;
+    private final FastFutureCallable<Object> runnable;
     private final FastRetry retry;
 
     private Object methodResult;
@@ -38,10 +41,12 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     private MethodInvocation methodInvocation;
 
+    private static final Map<Method,RetryPolicy> methodToRetryPolicyCache = new ConcurrentHashMap<>();
+
     public RetryAnnotationTask(Callable<Object> runnable,
                                FastRetry retry,
                                BeanFactory beanFactory, MethodInvocation methodInvocation) {
-        this.runnable = new FutureCallable<>(runnable);
+        this.runnable = new FastFutureCallable<>(runnable);
         this.retry = retry;
         this.beanFactory = beanFactory;
         this.methodInvocation = methodInvocation;
@@ -160,13 +165,34 @@ public class RetryAnnotationTask implements RetryTask<Object> {
     }
 
     private boolean doRetry(long curExecuteCount) throws Exception {
-        RetryPolicy methodRetryPolicy = findMethodParamRetryPolicy();
-        Class<? extends RetryPolicy> retryPolicyClass = getRetryPolicyClass();
-        if (methodRetryPolicy == null){
-            if (retryPolicyClass == null) {
-                return retryDoForNotRetryPolicy();
+        RetryPolicy methodRetryPolicy = null;
+        if (!methodToRetryPolicyCache.containsKey(methodInvocation.getMethod())){
+            // 1、find from method param
+            methodRetryPolicy = findMethodParamRetryPolicy();
+
+            // 2、find from annotation config
+            Class<? extends RetryPolicy> retryPolicyClass = getRetryPolicyClass();
+            if (methodRetryPolicy == null && retryPolicyClass != null) {
+                methodRetryPolicy = RetryResultPolicy.class.isAssignableFrom(retryPolicyClass) ? resultRetryPredicate : retryMethodInterceptor;
             }
-            methodRetryPolicy = RetryResultPolicy.class.isAssignableFrom(retryPolicyClass) ? resultRetryPredicate : retryMethodInterceptor;
+
+            // 3、find from method return value
+            if (methodRetryPolicy == null && FastRetryFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+                if (runnable.isCallFlag()){
+                    methodRetryPolicy  = runnable.getReturnValueFastRetryFuture().getRetryResultPolicy();
+                }else {
+                    doInvokeMethod();
+                    RetryResultPolicy<Object> policy  = runnable.getReturnValueFastRetryFuture().getRetryResultPolicy();
+                    return policy != null && invokerRetryResultPolicy(policy);
+                }
+            }
+            methodToRetryPolicyCache.put(methodInvocation.getMethod(),methodRetryPolicy);
+        }else {
+            methodRetryPolicy = methodToRetryPolicyCache.get(methodInvocation.getMethod());
+        }
+
+        if (methodRetryPolicy == null){
+            return retryDoForNotRetryPolicy();
         }
 
         if (RetryResultPolicy.class.isAssignableFrom(methodRetryPolicy.getClass())) {
@@ -179,6 +205,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
         throw new IllegalArgumentException("Unsupported RetryPolicy type for " + methodRetryPolicy.getClass());
     }
+
 
     private RetryPolicy findMethodParamRetryPolicy() {
         RetryPolicy methodRetryPolicy = null;
@@ -200,7 +227,7 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
         Exception exception = null;
         try {
-            methodResult = runnable.call();
+            doInvokeMethod();
         } catch (Exception e) {
             exception = e;
         }
@@ -211,21 +238,27 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         }
     }
 
+    private Object doInvokeMethod() throws Exception {
+        methodResult =  runnable.call();
+        return methodResult;
+    }
+
     private boolean retryDoForResultRetryPolicy(RetryResultPolicy<Object> policy) throws Exception {
-        methodResult = runnable.call();
-        if (policy != null) {
-            try {
-                return policy.test(methodResult);
-            } catch (ClassCastException e) {
-                Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
-                throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
-            }
+        doInvokeMethod();
+        return policy != null && invokerRetryResultPolicy(policy);
+    }
+
+    private boolean invokerRetryResultPolicy(RetryResultPolicy<Object> policy) {
+        try {
+            return policy.test(methodResult);
+        } catch (ClassCastException e) {
+            Class<?> resultClass = methodResult == null ? null : methodResult.getClass();
+            throw new RetryPolicyCastException("自定结果重试策略和方法结果类型不一致 实际结果类型:" + resultClass, e);
         }
-        return false;
     }
 
     private boolean retryDoForNotRetryPolicy() throws Exception {
-        methodResult = runnable.call();
+        doInvokeMethod();
         return false;
     }
 

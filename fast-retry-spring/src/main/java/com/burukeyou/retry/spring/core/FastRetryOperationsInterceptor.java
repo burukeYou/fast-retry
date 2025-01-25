@@ -3,6 +3,7 @@ package com.burukeyou.retry.spring.core;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.support.FastRetryFuture;
 import com.burukeyou.retry.spring.utils.BizUtil;
 import lombok.Setter;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -58,10 +59,9 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
             return invocation.proceed();
         }
 
+        // retry queue future
         CompletableFuture<Object> future = retryQueue.submit(retryTask);
-        if (Future.class.isAssignableFrom(returnType)){
-            return future;
-        }else {
+        if (!Future.class.isAssignableFrom(returnType)){
             try {
                 return future.get();
             } catch (InterruptedException e) {
@@ -74,5 +74,11 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
                 }
             }
         }
+
+        if (FastRetryFuture.class.equals(returnType)){
+            return new FastRetryFuture<>(future);
+        }
+
+        return future;
     }
 }
