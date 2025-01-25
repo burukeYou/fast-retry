@@ -7,6 +7,13 @@ public class WeatherResult {
 
     public String data;
 
+    private Integer count;
+
+    public WeatherResult(String data, Integer count) {
+        this.data = data;
+        this.count = count;
+    }
+
     public WeatherResult(String data) {
         this.data = data;
     }

@@ -1,10 +1,13 @@
 package com.burukeyou.retry.demo;
 
+import com.burukeyou.retry.core.exceptions.FastRetryTimeOutException;
 import com.burukeyou.retry.demo.data.B15Configuration;
 import com.burukeyou.retry.demo.data.BaseSpringTest;
 import com.burukeyou.retry.demo.data.WeatherResult;
 import com.burukeyou.retry.demo.data.WeatherService;
-import com.burukeyou.retry.core.exceptions.FastRetryTimeOutException;
+import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
+import com.burukeyou.retry.spring.support.FastRetryFuture;
+import com.burukeyou.retry.spring.support.FastRetryMethodInvocation;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +54,59 @@ public class FastRetryAnnotationsTest extends BaseSpringTest {
         WeatherResult result = weatherService.getWeatherForTestRetryStrategy("北京");
         log.info("城市轮询结束 result:{}",result);
     }
+
+    @Test
+    public void testFastRetryRetryStrategy2() throws Exception {
+        WeatherResult result = weatherService.getWeatherForTestRetryStrategy2("北京", weatherResult -> weatherResult.getCount() > 5);
+        log.info("城市轮询结束 result:{}",result);
+    }
+
+    @Test
+    public void testFastRetryRetryStrategy3() throws Exception {
+        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new RetryInterceptorPolicy<WeatherResult>() {
+            @Override
+            public boolean afterExecuteSuccess(WeatherResult methodReturnValue, FastRetryMethodInvocation invocation) {
+                return methodReturnValue.getCount() > 5;
+            }
+        });
+        log.info("城市轮询结束 result:{}",result);
+    }
+
+    @Test
+    public void testFastRetryRetryStrategy4() throws Exception {
+        FastRetryFuture<WeatherResult> future = weatherService.getWeatherForTestRetryStrategy4("北京");
+        log.info("城市轮询结束 result:{}",future.get());
+
+        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new RetryInterceptorPolicy<WeatherResult>() {
+            @Override
+            public boolean afterExecuteSuccess(WeatherResult methodReturnValue, FastRetryMethodInvocation invocation) {
+                return methodReturnValue.getCount() > 5;
+            }
+        });
+        log.info("城市轮询结束 result:{}",result);
+    }
+
+
+    /**
+     * 测试拦截器策略
+     * @throws Exception
+     */
+    @Test
+    public void testFastRetryRetryInteceptor() throws Exception {
+        WeatherResult result = weatherService.getWeatherForTestIntepctor("北京");
+        log.info("城市轮询结束 result:{}",result);
+    }
+
+    /**
+     *  测试自定义重试注解
+     * @throws Exception
+     */
+    @Test
+    public void testFastRetryRetryAnno() throws Exception {
+        WeatherResult result = weatherService.getWeatherForCusttomAnno("北京");
+        log.info("城市轮询结束 result:{}",result);
+    }
+
 
     /**
      * 测试FastRetry注解-CompletableFuture返回值
