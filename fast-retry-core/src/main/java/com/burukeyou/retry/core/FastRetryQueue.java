@@ -185,7 +185,7 @@ public class FastRetryQueue implements RetryQueue {
 
             this.count = this.count + 1;
             try {
-                return task.retry(count);
+                return task.retry();
             } catch (RetryPolicyCastException e) {
                 // not retry
                 lastException = e;
@@ -193,7 +193,7 @@ public class FastRetryQueue implements RetryQueue {
             } catch (Exception e) {
                 lastException = e;
                 if (task.printExceptionLog()) {
-                    log.info("[fast-retry-queue] 重试任务发生异常准备重试，当前执行次数[{}]", count-1,e);
+                    log.info("[fast-retry-queue] 重试任务发生异常准备重试，当前重试次数[{}]", count-1,e);
                 }
                 if (maxTimes == 0){
                     // not need retry
