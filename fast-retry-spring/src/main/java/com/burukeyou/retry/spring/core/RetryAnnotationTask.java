@@ -7,6 +7,8 @@ import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
+import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
+import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
 import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
 import com.burukeyou.retry.spring.support.FastFutureCallable;
@@ -41,13 +43,19 @@ public class RetryAnnotationTask implements RetryTask<Object> {
 
     private MethodInvocation methodInvocation;
 
+    private FastRetryInterceptor fastRetryInterceptor;
+    private FastRetryInvocation retryInvocation;
+
     private static final Map<Method,RetryPolicy> methodToRetryPolicyCache = new ConcurrentHashMap<>();
 
     public RetryAnnotationTask(Callable<Object> runnable,
                                FastRetry retry,
-                               BeanFactory beanFactory, MethodInvocation methodInvocation) {
+                               BeanFactory beanFactory, MethodInvocation methodInvocation,
+                               FastRetryInterceptor fastRetryInterceptor) {
         this.runnable = new FastFutureCallable<>(runnable);
         this.retry = retry;
+        this.fastRetryInterceptor = fastRetryInterceptor;
+        this.retryInvocation = getFastRetryInvocation();
         this.beanFactory = beanFactory;
         this.methodInvocation = methodInvocation;
         this.resultRetryPredicate = getPredicateStrategy(retry);
@@ -70,6 +78,24 @@ public class RetryAnnotationTask implements RetryTask<Object> {
         return retry.delay();
     }
 
+    private FastRetryInvocation getFastRetryInvocation() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void retryBefore() {
+        if (fastRetryInterceptor != null){
+            fastRetryInterceptor.methodInvokeBefore(retryInvocation);
+        }
+    }
+
+    @Override
+    public void retryAfter(Exception exception) {
+        if (fastRetryInterceptor != null){
+            methodResult = fastRetryInterceptor.methodInvokeAfter(methodResult,exception,retryInvocation);
+        }
+    }
 
     @Override
     public boolean retry(long curExecuteCount) throws Exception {

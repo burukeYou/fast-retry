@@ -3,6 +3,9 @@ package com.burukeyou.retry.spring.utils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+
 public class BizUtil {
 
     public static Class<?> getSuperClassParamFirstClass(Class<?> clz,Class<?> superClass){
@@ -35,5 +38,20 @@ public class BizUtil {
             current = current.getSuperclass();
         }
         return genericClassParameterizedType;
+    }
+
+    public static <T> T getBeanOrNew(Class<T> beanClass,BeanFactory beanFactory){
+        if (beanClass == null){
+            return null;
+        }
+        try {
+            return beanFactory.getBean(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            try {
+                return beanClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

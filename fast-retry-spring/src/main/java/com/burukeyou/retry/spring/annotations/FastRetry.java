@@ -4,7 +4,7 @@ package com.burukeyou.retry.spring.annotations;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.policy.RetryResultPolicy;
 import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
-import com.burukeyou.retry.spring.core.FastRetryAnnotationRetryTaskFactory;
+import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
 import com.burukeyou.retry.spring.core.policy.RetryInterceptorPolicy;
 
@@ -91,8 +91,13 @@ public @interface FastRetry {
     Class<? extends RetryPolicy>[] policy() default {};
 
     /**
-     * Specify the factory bean for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory
+     *  use custom  retry interceptor,
      */
-    Class<? extends AnnotationRetryTaskFactory> taskFactory() default FastRetryAnnotationRetryTaskFactory.class;
+    Class<? extends FastRetryInterceptor>[] interceptor() default {};
+
+    /**
+     * Specify the factory  for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory
+     */
+    Class<? extends AnnotationRetryTaskFactory>[] taskFactory() default {};
 
 }

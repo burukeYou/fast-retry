@@ -36,20 +36,6 @@ public interface FastRetryMethodInvocation extends MethodInvocation {
     }
 
     /**
-     * It is whether {@link #getCurExecuteCount()} is equal to two
-     */
-    default boolean isSecondExecute(){
-        return getCurExecuteCount() == 2;
-    }
-
-    /**
-     * It is whether {@link #getCurExecuteCount()} is equal to {@link #getMaxExecuteCount()}
-     */
-    default boolean isLastExecute(){
-        return getCurExecuteCount() == getMaxExecuteCount();
-    }
-
-    /**
      * There is no special meaning, just to facilitate the transfer of parameters between different methods
      */
     Map<String,Object> attachmentMap();
