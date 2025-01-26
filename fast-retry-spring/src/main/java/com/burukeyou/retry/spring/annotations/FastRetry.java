@@ -68,7 +68,7 @@ public @interface FastRetry {
     /**
      * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
      */
-    LogEnum errLog() default LogEnum.DEFAULT;
+    LogEnum errLog() default LogEnum.EVERY;
 
     /**
      * Set whether to simplify the stack information of the printing exception,

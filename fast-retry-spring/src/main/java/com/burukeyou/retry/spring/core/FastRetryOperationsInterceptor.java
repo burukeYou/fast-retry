@@ -4,7 +4,6 @@ import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
-import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.support.FastRetryFuture;
 import com.burukeyou.retry.spring.utils.BizUtil;
 import lombok.Setter;
@@ -15,11 +14,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * @author  caizhihao
@@ -44,8 +39,8 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
         this.annotationRetryTaskFactory = getRetryTaskFactory(retryAnnotation);
 
         //
-        Class<?> retryTaskFactoryClass = annotationRetryTaskFactory.getClass();
-        if (!annotationRetryTaskFactoryMap.containsKey(retryTaskFactoryClass)){
+        if (annotationRetryTaskFactory != null && !annotationRetryTaskFactoryMap.containsKey(annotationRetryTaskFactory.getClass())){
+            Class<? extends AnnotationRetryTaskFactory> retryTaskFactoryClass = annotationRetryTaskFactory.getClass();
             Class<?> superClassParamFirstClass = BizUtil.getSuperClassParamFirstClass(retryTaskFactoryClass, AnnotationRetryTaskFactory.class);
             annotationRetryTaskFactoryMap.put(retryTaskFactoryClass, FastRetry.class  == superClassParamFirstClass);
         }
@@ -69,11 +64,11 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
         Method method = invocation.getMethod();
         Class<?> returnType = method.getReturnType();
 
-        Boolean isFastRetryAnno = annotationRetryTaskFactoryMap.get(annotationRetryTaskFactory.getClass());
         RetryTask<Object> retryTask;
         if (annotationRetryTaskFactory == null){
             retryTask = getDefaultRetryTask(invocation);
         }else {
+            boolean isFastRetryAnno = annotationRetryTaskFactoryMap.get(annotationRetryTaskFactory.getClass());
             retryTask = annotationRetryTaskFactory.getRetryTask(invocation, isFastRetryAnno ? retryAnnotation.getFastRetry() : retryAnnotation.getSubAnnotation());
         }
 

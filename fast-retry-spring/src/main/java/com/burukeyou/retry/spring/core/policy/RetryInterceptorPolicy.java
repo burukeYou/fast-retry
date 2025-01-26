@@ -1,7 +1,7 @@
 package com.burukeyou.retry.spring.core.policy;
 
 import com.burukeyou.retry.core.policy.RetryPolicy;
-import com.burukeyou.retry.spring.support.FastRetryMethodInvocation;
+import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 
 /**
  * Provides policy and lifecycle handling before and after the retry
@@ -17,7 +17,7 @@ public interface RetryInterceptorPolicy<T> extends RetryPolicy {
      * @param invocation proxy method
      * @return if true continue to execute ,  or else stop to execute
      */
-    default boolean beforeExecute(FastRetryMethodInvocation invocation) throws Exception {
+    default boolean beforeExecute(FastRetryInvocation invocation) throws Exception {
         return true;
     }
 
@@ -27,7 +27,7 @@ public interface RetryInterceptorPolicy<T> extends RetryPolicy {
      * @param exception  the method execute exception
      * @param invocation proxy method
      */
-    default boolean afterExecuteFail(Exception exception, FastRetryMethodInvocation invocation) throws Exception {
+    default boolean afterExecuteFail(Exception exception, FastRetryInvocation invocation) throws Exception {
         throw exception;
     }
 
@@ -38,7 +38,7 @@ public interface RetryInterceptorPolicy<T> extends RetryPolicy {
      * @param invocation        proxy method
      * @return if true continue to retry invoke ,  or else stop retry invoke
      */
-    default boolean afterExecuteSuccess(T methodReturnValue, FastRetryMethodInvocation invocation) {
+    default boolean afterExecuteSuccess(T methodReturnValue, FastRetryInvocation invocation) {
         return false;
     }
 

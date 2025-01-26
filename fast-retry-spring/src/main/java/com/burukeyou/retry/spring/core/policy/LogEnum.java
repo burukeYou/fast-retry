@@ -18,7 +18,7 @@ public enum LogEnum {
      *     <li>When greater than 2, it is equivalent to {@link #PRE_2_LAST_1}</li>
      * </ul>
      */
-    DEFAULT,
+    AUTO,
 
     /**
      * Print the exception log for each time

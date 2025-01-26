@@ -1,17 +1,21 @@
 package com.burukeyou.retry.spring.core.invocation;
 
+import com.burukeyou.retry.spring.annotations.FastRetry;
+import org.aopalliance.intercept.MethodInvocation;
+
 import java.util.Map;
 
-import com.burukeyou.retry.spring.annotations.FastRetry;
-
-public interface FastRetryInvocation {
+public interface FastRetryInvocation extends MethodInvocation {
 
     /**
-     * Get the maximum number of retries, Equal to {@link FastRetry#maxAttempts()}
+     * get the config FastRetry annotation
      */
-    long getMaxAttempts();
+    FastRetry getFastRetryAnnotation();
 
-    long getActualExecuteCount();
+    /**
+     * get the retry task
+     */
+    long getCurExecuteCount();
 
     /**
      * There is no special meaning, just to facilitate the transfer of parameters between different methods

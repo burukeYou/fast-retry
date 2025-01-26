@@ -1,10 +1,10 @@
 package com.burukeyou.retry.spring.utils;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 public class BizUtil {
 
@@ -49,8 +49,8 @@ public class BizUtil {
         } catch (NoSuchBeanDefinitionException e) {
             try {
                 return beanClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+            } catch (InstantiationException | IllegalAccessException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
