@@ -32,6 +32,7 @@ public interface RetryTask<R> {
     boolean retry(long curExecuteCount) throws Exception;
 
     /**
+     * When the retry is complete, the retry result is returned
      * @return the  retry result
      */
     R getResult();
@@ -77,6 +78,20 @@ public interface RetryTask<R> {
      */
     default boolean printExceptionLog() {
         return true;
+    }
+
+    /**
+     * Callback before executing the retry task
+     */
+    default void retryBefore() {
+    }
+
+    /**
+     * This method is called back after the retry task is executed finish, and if the task has an exception message, it will be returned
+     * @param throwable    the execute exception info throw by  the {@link  #retry(long)} method
+     */
+    default void retryAfter(Exception throwable) {
+
     }
 
 }

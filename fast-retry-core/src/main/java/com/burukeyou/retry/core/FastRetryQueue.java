@@ -86,22 +86,23 @@ public class FastRetryQueue implements RetryQueue {
             return;
         }
 
+        Exception retryTaskException = retryTask.getLastException();
+
         CompletableFuture<Object> completableFuture = futureMap.remove(taskId);
         if (completableFuture == null) {
             log.error("[fast-retry-queue] can not find queueTask by id:{} retryTaskClass:{}", taskId, retryTask.getTask().getClass().getName());
             return;
         }
 
-        Object result = retryTask.getTask().getResult();
-        Exception retryTaskException = retryTask.getLastException();
+        retryTask.getTask().retryAfter(retryTaskException);
         if (retryTaskException == null) {
-            completableFuture.complete(result);
+            completableFuture.complete(retryTask.getTask().getResult());
             return;
         }
 
         if (exceptionRecover) {
             log.info("[fast-retry-queue] exception recover ", retryTaskException);
-            completableFuture.complete(null);
+            completableFuture.complete(retryTask.getTask().getResult());
         } else {
             completableFuture.completeExceptionally(retryTask.getLastException());
         }
@@ -115,6 +116,7 @@ public class FastRetryQueue implements RetryQueue {
         QueueTask queueTask = new QueueTask(taskId, (RetryTask<Object>) retryTask);
         CompletableFuture<Object> future = new RetryQueueFuture<>(queueTask);
         futureMap.put(taskId, future);
+        retryTask.retryBefore();
         retryTaskQueue.add(queueTask);
         return (CompletableFuture<R>) future;
     }

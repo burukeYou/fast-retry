@@ -8,6 +8,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @author caizhihao
+ * @param <T>
+ */
 public class RetryQueueFuture<T> extends CompletableFuture<T> {
 
     private FastRetryQueue.QueueTask queueTask;
