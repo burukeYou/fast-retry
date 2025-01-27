@@ -2,7 +2,7 @@ package com.burukeyou.retry.demo;
 
 import com.burukeyou.retry.core.FastRetryBuilder;
 import com.burukeyou.retry.core.FastRetryer;
-import com.burukeyou.retry.core.policy.RetryResultPolicy;
+import com.burukeyou.retry.core.policy.MethodResultPolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class FastRetryBuilderTest {
 
     @Test
     public void testBuild() throws ExecutionException, InterruptedException {
-        RetryResultPolicy<String> resultPolicy = result -> result.equals("444");
+        MethodResultPolicy<String> resultPolicy = result -> result.equals("444");
         FastRetryer<String> retryer = FastRetryBuilder.<String>builder()
                 .attemptMaxTimes(3)
                 .waitRetryTime(3, TimeUnit.SECONDS)
