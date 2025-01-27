@@ -1,74 +1,62 @@
-package com.burukeyou.retry.spring.annotations;
+package com.burukeyou.retry.spring.core.retrytask;
 
-
-import com.burukeyou.retry.core.policy.FastRetryPolicy;
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
-import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
+import com.burukeyou.retry.core.policy.RetryPolicy;
+import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
-import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
-
-import java.lang.annotation.*;
 
 /**
- * Retry annotation
- *
- * @author caizhihao
- *
+ * @author  caizhihao
  */
-@Target({ElementType.METHOD,ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-//@Inherited
-public @interface FastRetry {
+public interface FastRetryAdapter {
 
     /**
      * @return the maximum number of attempts , if -1, it means unlimited
      */
-    int maxAttempts() default 3;
+    int maxAttempts();
 
     /**
      * How long will it take to start the next retry, equals to {@link #delay},
      * If both are configured, retryWait() will take effect first
      */
-    RetryWait[] retryWait() default {};
+    RetryWait retryWait() ;
 
     /**
      * How long will it take to start the next retry, unit is MILLISECONDS
      */
-    long delay() default 500;
+    long delay();
 
     /**
      * Flag to say that whether try again when an exception occurs
      * @return try again if true
      */
-    boolean retryIfException() default true;
+    boolean retryIfException();
 
     /**
      * Exception types that are retryable.
      *
      * @return exception types to retry
      */
-    Class<? extends Exception>[] include() default {};
+    Class<? extends Exception>[] include();
 
     /**
      * Exception types that are not retryable.
      *
      * @return exception types to stop retry
      */
-    Class<? extends Exception>[] exclude() default {};
+    Class<? extends Exception>[] exclude();
 
     /**
      * Flag to say that whether recover when an exception occurs
      *
      * @return throw exception if false, if true return null and print exception log
      */
-    boolean exceptionRecover() default false;
+    boolean exceptionRecover();
 
     /**
      * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
      */
-    LogEnum errLog() default LogEnum.EVERY;
+    LogEnum errLog();
 
     /**
      * Set whether to simplify the stack information of the printing exception,
@@ -77,27 +65,17 @@ public @interface FastRetry {
      * and the complete exception information will still be printed
      * @see #errLog()
      */
-    boolean briefErrorLog() default false;
+    boolean briefErrorLog();
 
     /**
      *  use custom  retry strategy,
-     *  <p>Currently, the following policies are supported:</p>
-     *  <ul>
-     *      <li>{@link MethodResultPolicy}</li>
-     *      <li>{@link FastRetryInterceptorPolicy}</li>
-     *  </ul>
      * @return the class of retry-result-policy
      */
-    Class<? extends FastRetryPolicy>[] policy() default {};
+    Class<? extends RetryPolicy> policy() ;
 
     /**
      *  use custom  retry interceptor,
      */
-    Class<? extends FastRetryInterceptor>[] interceptor() default {};
-
-    /**
-     * Specify the factory  for building RetryTask, if this factory is replaced, then all retry functions of @FastRetry will prevail with this factory
-     */
-    Class<? extends AnnotationRetryTaskFactory>[] taskFactory() default {};
+    Class<? extends FastRetryInterceptor> interceptor() ;
 
 }

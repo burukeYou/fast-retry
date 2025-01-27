@@ -1,6 +1,6 @@
 package com.burukeyou.retry.spring.core.policy;
 
-import com.burukeyou.retry.core.policy.RetryPolicy;
+import com.burukeyou.retry.core.policy.FastRetryPolicy;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 
 /**
@@ -9,7 +9,7 @@ import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
  * @param <T> method return value
  * @author caizhihao
  */
-public interface RetryInterceptorPolicy<T> extends RetryPolicy {
+public interface FastRetryInterceptorPolicy<T> extends FastRetryPolicy {
 
     /**
      * Before each retry execution

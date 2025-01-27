@@ -3,7 +3,7 @@ package com.burukeyou.retry.spring.core;
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
-import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
+import com.burukeyou.retry.spring.core.retrytask.RetryAnnotationTask;
 import com.burukeyou.retry.spring.support.FastRetryFuture;
 import com.burukeyou.retry.spring.utils.BizUtil;
 import lombok.Setter;
@@ -28,8 +28,6 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
 
     private FastRetry fastRetryAnno;
     private AnnotationRetryTaskFactory<Annotation> annotationRetryTaskFactory;
-    private FastRetryInterceptor fastRetryInterceptor;
-
     private static final Map<Class<?>,Boolean> annotationRetryTaskFactoryMap = new ConcurrentHashMap<>();
 
     public FastRetryOperationsInterceptor(ListableBeanFactory beanFactory, RetryAnnotationMeta retryAnnotation) {
@@ -43,11 +41,6 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
             Class<? extends AnnotationRetryTaskFactory> retryTaskFactoryClass = annotationRetryTaskFactory.getClass();
             Class<?> superClassParamFirstClass = BizUtil.getSuperClassParamFirstClass(retryTaskFactoryClass, AnnotationRetryTaskFactory.class);
             annotationRetryTaskFactoryMap.put(retryTaskFactoryClass, FastRetry.class  == superClassParamFirstClass);
-        }
-
-        //
-        if (fastRetryAnno.interceptor().length > 0){
-            fastRetryInterceptor = BizUtil.getBeanOrNew(fastRetryAnno.interceptor()[0], beanFactory);
         }
     }
 
@@ -111,6 +104,7 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
                 }
             }
         };
-        return new RetryAnnotationTask(supplier,fastRetryAnno,beanFactory,invocation,fastRetryInterceptor);
+        return new RetryAnnotationTask(supplier,fastRetryAnno,beanFactory,invocation);
     }
+
 }

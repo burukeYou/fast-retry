@@ -4,6 +4,7 @@ package com.burukeyou.retry.spring.core.invocation.impl;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.core.invocation.AbstractMethodInvocation;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
+import com.burukeyou.retry.spring.core.retrytask.RetryCounter;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.util.HashMap;
@@ -12,14 +13,18 @@ import java.util.Map;
 public class FastRetryInvocationImpl extends AbstractMethodInvocation implements FastRetryInvocation {
 
     private FastRetry fastRetry;
-    private long actualExecuteCount;
-    private Map<String,Object> attachments;
+    private Map<String, Object> attachments;
+    private RetryCounter retryCounter;
 
-    public FastRetryInvocationImpl(MethodInvocation methodInvocation, FastRetry fastRetry) {
+    public FastRetryInvocationImpl(MethodInvocation methodInvocation,
+                                   FastRetry fastRetry,
+                                   RetryCounter retryCounter) {
         super(methodInvocation);
         this.fastRetry = fastRetry;
         this.attachments = new HashMap<>();
+        this.retryCounter = retryCounter;
     }
+
 
     @Override
     public FastRetry getFastRetryAnnotation() {
@@ -28,7 +33,7 @@ public class FastRetryInvocationImpl extends AbstractMethodInvocation implements
 
     @Override
     public long getCurExecuteCount() {
-        return actualExecuteCount;
+        return retryCounter.getCurExecuteCount();
     }
 
     @Override
@@ -36,8 +41,5 @@ public class FastRetryInvocationImpl extends AbstractMethodInvocation implements
         return attachments;
     }
 
-    public void incrementActualExecuteCount(){
-        this.actualExecuteCount = this.actualExecuteCount + 1;
-    }
 
 }
