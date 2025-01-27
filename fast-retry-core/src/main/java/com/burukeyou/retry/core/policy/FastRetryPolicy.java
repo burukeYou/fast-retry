@@ -1,11 +1,11 @@
 package com.burukeyou.retry.core.policy;
 
 /**
- *  Retry Policy
+ * Fast Retry Policy
  * <p>It is used to decide how to retry, whether to retry, or not</p>
  * @author caizhihao
  */
-public interface RetryPolicy {
+public interface FastRetryPolicy extends RetryPolicy {
 
 
 }

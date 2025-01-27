@@ -9,11 +9,11 @@ import java.util.function.Predicate;
  *
  * @author caizhihao
  */
-public interface RetryResultPolicy<T> extends Predicate<T>,  RetryPolicy {
+public interface MethodResultPolicy<T> extends Predicate<T>, FastRetryPolicy {
 
     /**
      * whether to continue retrying,
-     * @param t        the result of the retry
+     * @param t        the result of the retry, sometime is the method return value
      * @return         true if continue retrying
      */
     boolean canRetry(T t);
