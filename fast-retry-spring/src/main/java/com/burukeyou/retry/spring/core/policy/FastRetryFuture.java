@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring.support;
+package com.burukeyou.retry.spring.core.policy;
 
 import com.burukeyou.retry.core.policy.MethodResultPolicy;
 
@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
  * @author  caizhihao
  * @param <T>
  */
-@SuppressWarnings("ALL")
 public class FastRetryFuture<T> extends CompletableFuture<T> {
 
     static Object NIL;
@@ -29,7 +28,7 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
         }
     }
 
-    public FastRetryFuture() {
+    private FastRetryFuture() {
         super();
     }
 
@@ -50,22 +49,15 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    /**
-     * get the config retry policy
-     */
-    public MethodResultPolicy<T> getRetryResultPolicy() {
-        return retryResultPolicy;
-    }
 
     /**
      * Returns a new FastRetryFuture that is already completed with
      * the given value.
      *
-     * @param value the value
-     * @param <U> the type of the value
+     * @param data      the value
+     * @param <T>       the type of the value
      * @return the completed CompletableFuture
      */
     public static <T> FastRetryFuture<T> completedFuture(T data) {
@@ -80,6 +72,13 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
     public FastRetryFuture<T> retryWhen(MethodResultPolicy<T> retryPolicy){
         this.retryResultPolicy = retryPolicy;
         return this;
+    }
+
+    /**
+     * get the config retry policy
+     */
+    public MethodResultPolicy<T> getRetryWhen() {
+        return retryResultPolicy;
     }
 
     @Override

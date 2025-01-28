@@ -2,14 +2,16 @@ package com.burukeyou.retry.spring.core.retrytask;
 
 
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
-import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.core.invocation.impl.FastRetryInvocationImpl;
 import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
+import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 import com.burukeyou.retry.spring.support.FastFutureCallable;
+import com.burukeyou.retry.spring.support.Tuple2;
 import com.burukeyou.retry.spring.utils.BizUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
@@ -51,6 +53,19 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
         if (fastRetryInterceptor != null) {
             methodResult = fastRetryInterceptor.methodInvokeAfter(methodResult, exception, retryInvocation);
         }
+    }
+
+    @Override
+    protected void findMethodReturnRetryPolicy(Tuple2<Boolean, RetryPolicy> tuple2) throws Exception {
+       if (FastRetryFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+            doInvokeMethod();
+            FastRetryFuture<Object> futurePolicy = runnable.getReturnValueFuturePolicy();
+            MethodResultPolicy<Object> methodResultPolicy = futurePolicy.getRetryWhen();
+            if (methodResultPolicy != null){
+                tuple2.setC2(methodResultPolicy);
+                tuple2.setC1(methodResultPolicy.canRetry(methodResult));
+            }
+       }
     }
 
     @Override

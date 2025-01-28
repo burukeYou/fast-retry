@@ -5,6 +5,7 @@ import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
+import com.burukeyou.retry.spring.support.Tuple2;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
@@ -87,7 +88,12 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
             if (!LogEnum.NOT.equals(retryConfig.errLog())) {
                 start = System.currentTimeMillis();
             }
-            RetryPolicy retryPolicy = findRetryPolicy();
+
+            Tuple2<Boolean, RetryPolicy>tuple2 = new Tuple2<>();
+            RetryPolicy retryPolicy = findRetryPolicy(tuple2);
+            if (tuple2.getC2() != null){
+                return tuple2.getC1();
+            }
             return doRetry(retryPolicy);
         } catch (Exception e) {
             printLogInfo(start, retryConfig.errLog(), e);
@@ -95,7 +101,9 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
         }
     }
 
-    protected RetryPolicy findRetryPolicy() {
+
+
+    protected RetryPolicy findRetryPolicy(Tuple2<Boolean, RetryPolicy> tuple2)  throws Exception  {
         Method method = methodInvocation.getMethod();
         RetryPolicy methodRetryPolicy = null;
         if (!methodToRetryPolicyCache.containsKey(method)) {
@@ -109,22 +117,22 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
             }
 
             // 3、find from method return value
-//            if (methodRetryPolicy == null && FastRetryFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
-//                if (runnable.isCallFlag()){
-//                    methodRetryPolicy  = runnable.getReturnValueFastRetryFuture().getRetryResultPolicy();
-//                }else {
-//                    doInvokeMethod();
-//                    RetryResultPolicy<Object> policy  = runnable.getReturnValueFastRetryFuture().getRetryResultPolicy();
-//                    methodToRetryPolicyCache.put(retryInvocation.getMethod(),policy);
-//                    return policy != null && invokerRetryResultPolicy(policy);
-//                }
-//            }
+            if(methodRetryPolicy == null){
+                findMethodReturnRetryPolicy(tuple2);
+                if (tuple2.getC2() != null){
+                    methodRetryPolicy = tuple2.getC2();
+                }
+            }
             methodToRetryPolicyCache.put(method, methodRetryPolicy == null ? NULL_POLICY : methodRetryPolicy);
         } else {
             methodRetryPolicy = methodToRetryPolicyCache.get(method);
         }
         return methodRetryPolicy == NULL_POLICY ? null : methodRetryPolicy;
     }
+
+    protected void findMethodReturnRetryPolicy(Tuple2<Boolean, RetryPolicy> tuple2)  throws Exception {
+    }
+
 
     protected abstract boolean doRetry(RetryPolicy retryPolicy) throws Exception;
 

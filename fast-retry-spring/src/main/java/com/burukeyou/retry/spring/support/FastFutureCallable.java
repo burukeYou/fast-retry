@@ -1,6 +1,6 @@
 package com.burukeyou.retry.spring.support;
 
-import com.burukeyou.retry.core.exceptions.RetryFutureInterruptedException;
+import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -40,7 +40,7 @@ public class FastFutureCallable<T> implements Callable<T> {
             try {
                 result = ((Future<T>) result).get();
             } catch (InterruptedException e) {
-                throw new RetryFutureInterruptedException("Thread interrupted while futureCallable get result ",e);
+                throw e;
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
                 if (cause instanceof Exception){
@@ -53,11 +53,7 @@ public class FastFutureCallable<T> implements Callable<T> {
         return result;
     }
 
-    public FastRetryFuture<T> getReturnValueFastRetryFuture() {
+    public FastRetryFuture<T> getReturnValueFuturePolicy() {
         return returnValueFastRetryFuture;
-    }
-
-    public boolean isCallFlag() {
-        return callFlag;
     }
 }
