@@ -5,6 +5,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 
+/**
+ * @author  caizhihao
+ */
 public abstract class AbstractMethodInvocation implements MethodInvocation {
 
     protected final MethodInvocation methodInvocation;

@@ -3,6 +3,7 @@ package com.burukeyou.retry.spring.core.interceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 
 /**
+ * method invoke Interceptor
  * @author  caizhihao
  */
 public interface FastRetryInterceptor {

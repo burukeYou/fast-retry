@@ -18,6 +18,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author  caizhihao
+ * @param <R>
+ */
 @Slf4j
 public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
 

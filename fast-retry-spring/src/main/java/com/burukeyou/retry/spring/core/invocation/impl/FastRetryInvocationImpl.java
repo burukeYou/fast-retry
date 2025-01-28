@@ -10,6 +10,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author  caizhihao
+ */
 public class FastRetryInvocationImpl extends AbstractMethodInvocation implements FastRetryInvocation {
 
     private FastRetry fastRetry;

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
 
 /**
+ *  FastRetry Complete Future Extend， can config RetryPolicy
  * @author  caizhihao
  * @param <T>
  */
