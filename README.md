@@ -229,7 +229,7 @@ public class UserService {
 ```
 
 
-## 3.4 重试策略（FastResultPolicy） - 根据返回结果判断重试
+## 3.4 重试策略 - 根据返回结果判断重试
 如果你需要根据返回结果的值进行重试，可以实现自定义的重试逻辑
 
 1） 实现FastResultPolicy接口实现自定义的结果重试策略
@@ -249,7 +249,7 @@ public class UserService {
 @FastRetry(policy = MyPolicy1.class)
 ```
 
-## 3.5 重试策略（FastInterceptorPolicy）-全链路判断重试
+## 3.5 重试策略（-全链路判断重试
 除了可以配置 在 3.4 的重试策略也可以配置更加细粒度的重试策略，即FastInterceptorPolicy， 它提供了重试之前，重试成功、重试失败后控制
 
 1） 实现FastInterceptorPolicy接口
@@ -294,7 +294,7 @@ public class UserService {
 
 在3.4、3.5 章节中我们都是把重试策略配置到 @FastRetry注解的policy参数上，下面介绍其他配置方式
 
-## 3.6.1 配置到具体方法参数上
+### 3.6.1 配置到具体方法参数上
 只需在任意的一个方法参数上声明一个 Policy 即可，然后在具体调用时传递子类逻辑
 
 ```java
@@ -317,7 +317,7 @@ public class UserService {
     }
 ```
 
-## 3.6.1 配置到具体方法返回值上
+### 3.6.1 配置到具体方法返回值上
 可以将方法返回值定义成FastRetryFuture， 然后使用 retryWhen方法在里面配置重试策略Policy
 
 ```java
