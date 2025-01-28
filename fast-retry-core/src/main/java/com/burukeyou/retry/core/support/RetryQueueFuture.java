@@ -8,6 +8,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @author caizhihao
+ * @param <T>
+ */
 public class RetryQueueFuture<T> extends CompletableFuture<T> {
 
     private FastRetryQueue.QueueTask queueTask;
@@ -26,14 +30,30 @@ public class RetryQueueFuture<T> extends CompletableFuture<T> {
     }
 
     @Override
+    public T get() throws InterruptedException, ExecutionException {
+        try {
+            return super.get();
+        } catch (ExecutionException e){
+            if (e.getCause() instanceof RuntimeException){
+                throw (RuntimeException)e.getCause();
+            }else {
+                throw e;
+            }
+        }
+    }
+
+    @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         try {
-            T result = super.get(timeout, unit);
-            return result;
+            return super.get(timeout, unit);
         } catch (InterruptedException e) {
             throw e;
         } catch (ExecutionException e) {
-            throw e;
+            if (e.getCause() instanceof RuntimeException){
+                throw (RuntimeException)e.getCause();
+            }else {
+                throw e;
+            }
         } catch (TimeoutException e) {
             throw e;
         }finally {

@@ -4,6 +4,7 @@ package com.burukeyou.retry.core;
 import com.burukeyou.retry.core.exceptions.FastRetryTimeOutException;
 import com.burukeyou.retry.core.exceptions.RetryFutureInterruptedException;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
+import com.burukeyou.retry.core.support.FastRetryThreadPool;
 import com.burukeyou.retry.core.support.RetryQueueFuture;
 import com.burukeyou.retry.core.task.DelayedTask;
 import com.burukeyou.retry.core.task.RetryTask;
@@ -16,7 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 /**
- *  Default implementation of retry queue
+ * Default implementation of retry queue
+ *
  * @author caizhihao
  */
 @Slf4j
@@ -26,32 +28,33 @@ public class FastRetryQueue implements RetryQueue {
 
     private final ExecutorService pool;
 
-    private  final DelayQueue<ReQueueDelayedTask> delayQueue = new DelayQueue<>();
+    private final DelayQueue<ReQueueDelayedTask> delayQueue = new DelayQueue<>();
 
-    private final Map<String,CompletableFuture<Object>> futureMap = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<Object>> futureMap = new ConcurrentHashMap<>();
 
-    public FastRetryQueue(ExecutorService pool){
+    public FastRetryQueue(ExecutorService pool) {
         this.pool = pool;
         start();
     }
 
     public FastRetryQueue(int corePoolSize) {
-        this(new ThreadPoolExecutor(corePoolSize, corePoolSize*2, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()));
+        this(new FastRetryThreadPool(corePoolSize,corePoolSize * 4,60, TimeUnit.SECONDS));
     }
+
 
     private void start() {
         new Thread(() -> {
-            for(;;){
+            for (; ; ) {
                 try {
                     delayQueue.take().run();
                 } catch (InterruptedException e) {
-                     Thread.currentThread().interrupt();
+                    Thread.currentThread().interrupt();
                 }
             }
-        }).start();
+        },"fastRetry-thread-delayQueue").start();
 
         new Thread(() -> {
-            for(;;){
+            for (; ; ) {
                 final QueueTask retryTask;
                 try {
                     retryTask = retryTaskQueue.take();
@@ -64,41 +67,43 @@ public class FastRetryQueue implements RetryQueue {
                     try {
                         consumer(retryTask);
                     } catch (Exception e) {
-                        throw new IllegalStateException("retry queue consumer process exception ",e);
+                        throw new IllegalStateException("retry queue consumer process exception ", e);
                     }
                 });
             }
-        }).start();
+        },"fastRetry-thread-retryTaskQueue").start();
     }
 
-    private void consumer(QueueTask retryTask){
+    private void consumer(QueueTask retryTask) {
         String taskId = retryTask.getTaskId();
         RetryTask<?> task = retryTask.getTask();
         boolean exceptionRecover = task.exceptionRecover();
         boolean retry = retryTask.isRetry();
 
-        if (retry){
+        if (retry) {
             Runnable runnable = () -> retryTaskQueue.add(retryTask);
-            delayQueue.put(new ReQueueDelayedTask(runnable,taskId, task.waitRetryTime(), TimeUnit.MILLISECONDS));
+            delayQueue.put(new ReQueueDelayedTask(runnable, taskId, task.waitRetryTime(), TimeUnit.MILLISECONDS));
             return;
         }
+
+        Exception retryTaskException = retryTask.getLastException();
 
         CompletableFuture<Object> completableFuture = futureMap.remove(taskId);
-        if (completableFuture == null){
+        if (completableFuture == null) {
+            log.error("[fast-retry-queue] can not find queueTask by id:{} retryTaskClass:{}", taskId, retryTask.getTask().getClass().getName());
             return;
         }
 
-        Object result = retryTask.getTask().getResult();
-        Exception retryTaskException = retryTask.getLastException();
-        if (retryTaskException == null){
-            completableFuture.complete(result);
+        retryTask.getTask().retryAfter(retryTaskException);
+        if (retryTaskException == null) {
+            completableFuture.complete(retryTask.getTask().getResult());
             return;
         }
 
-        if (exceptionRecover){
-            log.info("",retryTaskException);
-            completableFuture.complete(null);
-        }else {
+        if (exceptionRecover) {
+            log.info("[fast-retry-queue] exception recover ", retryTaskException);
+            completableFuture.complete(retryTask.getTask().getResult());
+        } else {
             completableFuture.completeExceptionally(retryTask.getLastException());
         }
 
@@ -108,26 +113,27 @@ public class FastRetryQueue implements RetryQueue {
     @Override
     public <R> CompletableFuture<R> submit(RetryTask<R> retryTask) {
         String taskId = getTaskId();
-        QueueTask queueTask = new QueueTask(taskId, (RetryTask<Object>)retryTask);
-        retryTaskQueue.add(queueTask);
+        QueueTask queueTask = new QueueTask(taskId, (RetryTask<Object>) retryTask);
         CompletableFuture<Object> future = new RetryQueueFuture<>(queueTask);
-        futureMap.put(taskId,future);
-        return (CompletableFuture<R>)future;
+        futureMap.put(taskId, future);
+        retryTask.retryBefore();
+        retryTaskQueue.add(queueTask);
+        return (CompletableFuture<R>) future;
     }
 
     private String getTaskId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public <R> R execute(RetryTask<R> retryTask){
+    public <R> R execute(RetryTask<R> retryTask) {
         try {
             return submit(retryTask).get();
         } catch (InterruptedException e) {
-            throw new RetryFutureInterruptedException("Thread interrupted while future get ",e);
+            throw new RetryFutureInterruptedException("Thread interrupted while future get ", e);
         } catch (ExecutionException e) {
-            if(e.getCause() instanceof RuntimeException){
-                throw (RuntimeException)e.getCause();
-            }else {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
                 throw new RuntimeException(e.getCause());
             }
         }
@@ -138,11 +144,11 @@ public class FastRetryQueue implements RetryQueue {
         try {
             return submit(retryTask).get(timeout, timeUnit);
         } catch (InterruptedException e) {
-            throw new RetryFutureInterruptedException("Thread interrupted while future get ",e);
+            throw new RetryFutureInterruptedException("Thread interrupted while future get ", e);
         } catch (ExecutionException e) {
-            if(e.getCause() instanceof RuntimeException){
-                throw (RuntimeException)e.getCause();
-            }else {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
                 throw new RuntimeException(e.getCause());
             }
         }
@@ -155,7 +161,7 @@ public class FastRetryQueue implements RetryQueue {
 
         private boolean isStop = false;
 
-        private Integer count = 0;
+        private long count = 0;
 
         private Exception lastException;
 
@@ -164,40 +170,46 @@ public class FastRetryQueue implements RetryQueue {
             this.task = task;
         }
 
-        public boolean isRetry(){
+        public boolean isRetry() {
             // reset lastException
-            lastException = null;
-            if (isStop){
+            if (isStop) {
                 return false;
             }
-            int maxTimes = task.attemptMaxTimes();
-            if (maxTimes > 0 && count > maxTimes){
-                lastException =  new FastRetryTimeOutException("The maximum retry count has been exceeded after "+maxTimes+" times. Stop retry");
+            long maxTimes = task.attemptMaxTimes();
+            if (maxTimes >= 0 && count > maxTimes) {
+                lastException = new FastRetryTimeOutException("The maximum retry count has been exceeded after " + maxTimes + " times. Stop retry",lastException);
                 return false;
+            }else {
+                lastException = null;
             }
 
             this.count = this.count + 1;
             try {
                 return task.retry();
-            }catch (RetryPolicyCastException e){
+            } catch (RetryPolicyCastException e) {
                 // not retry
                 lastException = e;
                 return false;
             } catch (Exception e) {
                 lastException = e;
-                if (task.printExceptionLog()){
-                    log.info("",e);
+                if (task.printExceptionLog()) {
+                    log.info("[fast-retry-queue] 重试任务发生异常准备重试，当前重试次数[{}]", count-1,e);
                 }
-                if (!task.retryIfException()){
+                if (maxTimes == 0){
+                    // not need retry
+                    return false;
+                }
+
+                if (!task.retryIfException()) {
                     return false;
                 }
 
                 // not retry
-                if(isContainException(task.exclude(),lastException)){
+                if (isContainException(task.exclude(), lastException)) {
                     return false;
                 }
 
-                if (task.include() == null || task.include().isEmpty()){
+                if (task.include() == null || task.include().isEmpty()) {
                     // not config include exception ,retry all exception
                     return true;
                 }
@@ -210,13 +222,13 @@ public class FastRetryQueue implements RetryQueue {
             this.isStop = true;
         }
 
-        public boolean isContainException(List<Class<? extends Exception>> excludeExceptionList,Exception e){
-            if (excludeExceptionList == null || excludeExceptionList.isEmpty()){
+        public boolean isContainException(List<Class<? extends Exception>> excludeExceptionList, Exception e) {
+            if (excludeExceptionList == null || excludeExceptionList.isEmpty()) {
                 return false;
             }
 
             for (Class<? extends Throwable> ex : excludeExceptionList) {
-                if (ex.isAssignableFrom(e.getClass())){
+                if (ex.isAssignableFrom(e.getClass())) {
                     return true;
                 }
             }
@@ -225,16 +237,16 @@ public class FastRetryQueue implements RetryQueue {
     }
 
 
-     static class ReQueueDelayedTask extends DelayedTask {
+    static class ReQueueDelayedTask extends DelayedTask {
 
         private final Runnable task;
 
-        ReQueueDelayedTask(Runnable task,String name, long delay, TimeUnit unit) {
+        ReQueueDelayedTask(Runnable task, String name, long delay, TimeUnit unit) {
             super(name, delay, unit);
             this.task = task;
         }
 
-        public void run(){
+        public void run() {
             this.task.run();
         }
     }
