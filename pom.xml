@@ -12,7 +12,27 @@
     <!-- info  -->
     <name>fast-retry</name>
     <url>https://github.com/burukeYou/fast-retry</url>
-    <description>A high-performance task retry framework</description>
+    <description>A high-performance task retry framework, only a few threads are needed to support millions of task retries</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>caizhihao</name>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/burukeYou/fast-retry.git</connection>
+        <developerConnection>scm:git:ssh://github.com:burukeYou/fast-retry.git</developerConnection>
+        <url>http://github.com/burukeYou/fast-retry.git/tree/main</url>
+        <tag>${revision}</tag>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,25 +66,6 @@
         </dependencies>
     </dependencyManagement>
 
-
-    <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>caizhihao</name>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git://github.com/burukeYou/fast-retry.git</connection>
-        <developerConnection>scm:git:ssh://github.com:burukeYou/fast-retry.git</developerConnection>
-        <url>http://github.com/burukeYou/fast-retry.git/tree/main</url>
-    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -177,12 +178,20 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
+                        <!-- 在哪个阶段运行 -->
+                        <id>flatten.package</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>clean</goal>
+                            <goal>flatten</goal>
                         </goals>
                     </execution>
+<!--                    <execution>-->
+<!--                        <id>flatten.clean</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>clean</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
         </plugins>
