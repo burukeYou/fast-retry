@@ -2,7 +2,7 @@ package com.burukeyou.retry.demo.data;
 
 
 import com.burukeyou.retry.core.FastRetryBuilder;
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.demo.anno.BQRetry;
 import com.burukeyou.retry.demo.data.policy.AllPolicy;
 import com.burukeyou.retry.spring.annotations.FastRetry;
@@ -10,8 +10,8 @@ import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
-import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
-import com.burukeyou.retry.spring.support.FastRetryFuture;
+import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
+import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 import com.github.rholder.retry.*;
 import com.google.common.base.Predicates;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class WeatherService {
 
     private int index = 0;
 
-    public static class WeatherServiceResultPredicate implements MethodResultPolicy<WeatherResult> {
+    public static class WeatherServiceResultPredicate implements FastResultPolicy<WeatherResult> {
 
         private int i = 0;
 
@@ -73,20 +73,20 @@ public class WeatherService {
     }
 
     @FastRetry(delay = 5000,maxAttempts = 15)
-    public WeatherResult getWeatherForTestRetryStrategy2(String cityName, MethodResultPolicy<WeatherResult> policy){
+    public WeatherResult getWeatherForTestRetryStrategy2(String cityName, FastResultPolicy<WeatherResult> policy){
         int i = new Random().nextInt(40);
         log.info("WeatherService进行重试  次数:{} 城市: {} 随机数:{} ",++index,cityName, i);
         return new WeatherResult(cityName, i);
     }
 
     @FastRetry(delay = 3000,maxAttempts = 4)
-    public WeatherResult getWeatherForTestRetryStrategy3(String cityName, FastRetryInterceptorPolicy<WeatherResult> interceptor){
+    public WeatherResult getWeatherForTestRetryStrategy3(String cityName, FastInterceptorPolicy<WeatherResult> interceptor){
         int i = new Random().nextInt(40);
         //log.info("WeatherService进行重试  次数:{} 城市: {} 随机数:{} ",++index,cityName, i);
         return new WeatherResult(cityName, i);
     }
 
-    @FastRetry(delay = 3000,maxAttempts = 4)
+    @FastRetry(delay = 1000,maxAttempts = 10)
     public FastRetryFuture<WeatherResult> getWeatherForTestRetryStrategy4(String cityName){
         int i = new Random().nextInt(40);
         log.info("WeatherService进行重试  次数:{} 城市: {} 随机数:{} ",++index,cityName, i);
@@ -96,7 +96,7 @@ public class WeatherService {
     }
 
     @FastRetry(delay = 3000,maxAttempts = 4,interceptor = MyFastRetryInterceptor.class)
-    public WeatherResult getWeatherForTestRetryStrategy5(String cityName, MethodResultPolicy<WeatherResult> policy){
+    public WeatherResult getWeatherForTestRetryStrategy5(String cityName, FastResultPolicy<WeatherResult> policy){
         int i = new Random().nextInt(40);
         log.info("WeatherService进行重试  次数:{} 城市: {} 随机数:{} ",++index,cityName, i);
         return new WeatherResult(cityName, i);

@@ -2,7 +2,7 @@ package com.burukeyou.retry.spring.core.retrytask;
 
 
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
-import com.burukeyou.retry.core.policy.FastMethodPolicy;
+import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
@@ -60,7 +60,7 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
        if (FastRetryFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
             doInvokeMethod();
             FastRetryFuture<Object> futurePolicy = runnable.getReturnValueFuturePolicy();
-            FastMethodPolicy<Object> methodResultPolicy = futurePolicy.getRetryWhen();
+            FastResultPolicy<Object> methodResultPolicy = futurePolicy.getRetryWhen();
             if (methodResultPolicy != null){
                 tuple2.setC2(methodResultPolicy);
                 tuple2.setC1(methodResultPolicy.canRetry(methodResult));
@@ -73,8 +73,8 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
         if (retryPolicy == null) {
             return retryDoForNotRetryPolicy();
         }
-        if (FastMethodPolicy.class.isAssignableFrom(retryPolicy.getClass())) {
-            return retryDoForResultRetryPolicy((FastMethodPolicy<Object>) retryPolicy);
+        if (FastResultPolicy.class.isAssignableFrom(retryPolicy.getClass())) {
+            return retryDoForResultRetryPolicy((FastResultPolicy<Object>) retryPolicy);
         }
         if (FastInterceptorPolicy.class.isAssignableFrom(retryPolicy.getClass())) {
             return retryDoForInterceptorPolicy((FastInterceptorPolicy<Object>) retryPolicy);
@@ -105,12 +105,12 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
         return methodResult;
     }
 
-    private boolean retryDoForResultRetryPolicy(FastMethodPolicy<Object> policy) throws Exception {
+    private boolean retryDoForResultRetryPolicy(FastResultPolicy<Object> policy) throws Exception {
         doInvokeMethod();
         return policy != null && invokerRetryResultPolicy(policy);
     }
 
-    protected boolean invokerRetryResultPolicy(FastMethodPolicy<Object> policy) {
+    protected boolean invokerRetryResultPolicy(FastResultPolicy<Object> policy) {
         try {
             return policy.test(methodResult);
         } catch (ClassCastException e) {

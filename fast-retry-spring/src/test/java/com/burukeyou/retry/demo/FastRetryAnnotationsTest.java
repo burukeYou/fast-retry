@@ -6,8 +6,8 @@ import com.burukeyou.retry.demo.data.BaseSpringTest;
 import com.burukeyou.retry.demo.data.WeatherResult;
 import com.burukeyou.retry.demo.data.WeatherService;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
-import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
-import com.burukeyou.retry.spring.support.FastRetryFuture;
+import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
+import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -63,7 +64,7 @@ public class FastRetryAnnotationsTest extends BaseSpringTest {
 
     @Test
     public void testFastRetryRetryStrategy3() throws Exception {
-        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new FastRetryInterceptorPolicy<WeatherResult>() {
+        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new FastInterceptorPolicy<WeatherResult>() {
             @Override
             public boolean afterExecuteSuccess(WeatherResult methodReturnValue, FastRetryInvocation invocation) {
                 log.info("当前执行次数：count:{}", invocation.getCurExecuteCount());
@@ -75,10 +76,31 @@ public class FastRetryAnnotationsTest extends BaseSpringTest {
 
     @Test
     public void testFastRetryRetryStrategy4() throws Exception {
-        FastRetryFuture<WeatherResult> future = weatherService.getWeatherForTestRetryStrategy4("北京");
-        log.info("城市轮询结束 result:{}",future.get());
 
-        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new FastRetryInterceptorPolicy<WeatherResult>() {
+        for (int i = 0; i < 10; i++) {
+            final int j = i;
+            new Thread(() -> {
+                FastRetryFuture<WeatherResult> future = weatherService.getWeatherForTestRetryStrategy4("城市[" + j+"]");
+                try {
+                    log.info("城市[{}]轮询结束 result:{}",j,future.get());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+        }
+
+         Thread.sleep(3000000);
+//        FastRetryFuture<WeatherResult> future = weatherService.getWeatherForTestRetryStrategy4("北京");
+//        log.info("城市轮询结束 result:{}",future.get());
+//
+//        FastRetryFuture<WeatherResult> future333 = weatherService.getWeatherForTestRetryStrategy4("北京");
+//        log.info("城市轮询结束2222 result:{}",future333.get());
+    }
+
+    public void testFFF5(){
+        WeatherResult result = weatherService.getWeatherForTestRetryStrategy3("北京", new FastInterceptorPolicy<WeatherResult>() {
             @Override
             public boolean afterExecuteSuccess(WeatherResult methodReturnValue, FastRetryInvocation invocation) {
                 return methodReturnValue.getCount() > 5;

@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  *
  * @author caizhihao
  */
-public interface FastMethodPolicy<T> extends Predicate<T>, FastRetryPolicy {
+public interface FastResultPolicy<T> extends Predicate<T>, FastRetryPolicy {
 
     /**
      * whether to continue retrying,

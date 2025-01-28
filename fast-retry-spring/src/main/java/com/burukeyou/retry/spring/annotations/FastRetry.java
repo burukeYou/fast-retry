@@ -2,7 +2,7 @@ package com.burukeyou.retry.spring.annotations;
 
 
 import com.burukeyou.retry.core.policy.FastRetryPolicy;
-import com.burukeyou.retry.core.policy.FastMethodPolicy;
+import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.spring.core.extend.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
@@ -83,7 +83,7 @@ public @interface FastRetry {
      *  use custom  retry strategy,
      *  <p>Currently, the following policies are supported:</p>
      *  <ul>
-     *      <li>{@link FastMethodPolicy}</li>
+     *      <li>{@link FastResultPolicy}</li>
      *      <li>{@link FastInterceptorPolicy}</li>
      *  </ul>
      * @return the class of retry-result-policy

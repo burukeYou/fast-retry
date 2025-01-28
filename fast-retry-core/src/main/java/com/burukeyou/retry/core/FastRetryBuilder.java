@@ -1,6 +1,6 @@
 package com.burukeyou.retry.core;
 
-import com.burukeyou.retry.core.policy.FastMethodPolicy;
+import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.core.task.RetryTaskContext;
 
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  *          .retryIfException(true)
  *          .retryIfExceptionOfType(TimeoutException.class)
  *          .exceptionRecover(true)
- *          .resultPolicy(resultPolicy)
+ *          .retryPolicy(resultPolicy)
  *          .build();
  *
  * }</pre>
@@ -50,7 +50,7 @@ public class FastRetryBuilder<V> {
     private Boolean retryIfException = true;
 
     private Boolean exceptionRecover = false;
-    private FastMethodPolicy<V> resultPolicy;
+    private FastResultPolicy<V> resultPolicy;
 
     public static <T> CompletableFuture<T> of(T data) {
         return CompletableFuture.completedFuture(data);
@@ -141,7 +141,7 @@ public class FastRetryBuilder<V> {
     /**
      * @param resultPolicy      use custom result retry policy,
      */
-    public FastRetryBuilder<V> resultPolicy(FastMethodPolicy<V> resultPolicy) {
+    public FastRetryBuilder<V> retryPolicy(FastResultPolicy<V> resultPolicy) {
         this.resultPolicy = resultPolicy;
         return this;
     }
@@ -158,7 +158,7 @@ public class FastRetryBuilder<V> {
         retryTaskContext.setWaitRetryTime(waitRetryTime);
         retryTaskContext.setRetryIfException(retryIfException);
         retryTaskContext.setExceptionRecover(exceptionRecover);
-        retryTaskContext.setResultPolicy((FastMethodPolicy<Object>) resultPolicy);
+        retryTaskContext.setResultPolicy((FastResultPolicy<Object>) resultPolicy);
         retryTaskContext.setExceptionsType(exceptions);
         retryTaskContext.setExcludeExceptionsType(excludeExceptions);
         return new FastRetryer<>(retryQueue,retryTaskContext);

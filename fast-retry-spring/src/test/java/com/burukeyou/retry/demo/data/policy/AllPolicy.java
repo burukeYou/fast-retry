@@ -2,20 +2,20 @@ package com.burukeyou.retry.demo.data.policy;
 
 import com.burukeyou.retry.demo.data.WeatherResult;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
-import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
+import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AllPolicy {
 
-    public static class MyPolicy1 implements FastRetryInterceptorPolicy<WeatherResult> {
+    public static class MyPolicy1 implements FastInterceptorPolicy<WeatherResult> {
 
         private Integer executeCount = 0;
 
         @Override
         public boolean beforeExecute(FastRetryInvocation invocation) throws Exception {
             executeCount++;
-            return FastRetryInterceptorPolicy.super.beforeExecute(invocation);
+            return FastInterceptorPolicy.super.beforeExecute(invocation);
         }
 
         @Override
