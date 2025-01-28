@@ -68,6 +68,10 @@ public class FastRetryOperationsInterceptor  implements MethodInterceptor {
 
         // retry queue future
         CompletableFuture<Object> future = retryQueue.submit(retryTask);
+        if (void.class == returnType || Void.class == returnType){
+            return future;
+        }
+
         if (!Future.class.isAssignableFrom(returnType)){
             return getResult(future);
         }
