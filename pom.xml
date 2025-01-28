@@ -41,7 +41,7 @@
         <sno.serviceId>central</sno.serviceId>
         <dp.name>fast-retry-${revision}</dp.name>
 
-        <revision>0.3.0</revision>
+        <revision>0.3.1</revision>
         <fast-retry-core-version>${revision}</fast-retry-core-version>
         <fast-retry-spring-version>${revision}</fast-retry-spring-version>
     </properties>
