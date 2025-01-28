@@ -2,11 +2,11 @@ package com.burukeyou.retry.spring.annotations;
 
 
 import com.burukeyou.retry.core.policy.FastRetryPolicy;
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.FastMethodPolicy;
 import com.burukeyou.retry.spring.core.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.policy.LogEnum;
-import com.burukeyou.retry.spring.core.policy.FastRetryInterceptorPolicy;
+import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
 
 import java.lang.annotation.*;
 
@@ -83,8 +83,8 @@ public @interface FastRetry {
      *  use custom  retry strategy,
      *  <p>Currently, the following policies are supported:</p>
      *  <ul>
-     *      <li>{@link MethodResultPolicy}</li>
-     *      <li>{@link FastRetryInterceptorPolicy}</li>
+     *      <li>{@link FastMethodPolicy}</li>
+     *      <li>{@link FastInterceptorPolicy}</li>
      *  </ul>
      * @return the class of retry-result-policy
      */

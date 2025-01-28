@@ -5,15 +5,19 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import java.util.Map;
 
+/**
+ * Retry Invocation Context
+ * @author caizhihao
+ */
 public interface FastRetryInvocation extends MethodInvocation {
 
     /**
      * get the config FastRetry annotation
      */
-    FastRetry getFastRetryAnnotation();
+    FastRetry getFastRetry();
 
     /**
-     * get the retry task
+     * get the current execute count
      */
     long getCurExecuteCount();
 

@@ -1,10 +1,10 @@
 package com.burukeyou.retry.core.exceptions;
 
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.FastMethodPolicy;
 
 /**
- *  When using a custom result retry strategy {@link MethodResultPolicy},
- *  if the actual method return value is different from the return value type defined by the {@link MethodResultPolicy},
+ *  When using a custom result retry strategy {@link FastMethodPolicy},
+ *  if the actual method return value is different from the return value type defined by the {@link FastMethodPolicy},
  *  this exception is thrown and the retry is stopped
  *
  *

@@ -1,6 +1,6 @@
 package com.burukeyou.retry.spring.core.policy;
 
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.FastMethodPolicy;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +14,7 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
     static Object NIL;
     static Field resultFiled;
 
-    private MethodResultPolicy<T> retryResultPolicy;
+    private FastMethodPolicy<T> retryResultPolicy;
 
     private CompletableFuture<T> asyncFuture;
 
@@ -69,7 +69,7 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
      * @param retryPolicy
      * @return
      */
-    public FastRetryFuture<T> retryWhen(MethodResultPolicy<T> retryPolicy){
+    public FastRetryFuture<T> retryWhen(FastMethodPolicy<T> retryPolicy){
         this.retryResultPolicy = retryPolicy;
         return this;
     }
@@ -77,7 +77,7 @@ public class FastRetryFuture<T> extends CompletableFuture<T> {
     /**
      * get the config retry policy
      */
-    public MethodResultPolicy<T> getRetryWhen() {
+    public FastMethodPolicy<T> getRetryWhen() {
         return retryResultPolicy;
     }
 

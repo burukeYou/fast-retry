@@ -4,12 +4,12 @@ import com.burukeyou.retry.core.policy.FastRetryPolicy;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 
 /**
- * Provides policy and lifecycle handling before and after the retry
+ * Provides policy and lifecycle handling before and after the retry，and decide whether to continue retry or not
  *
  * @param <T> method return value
  * @author caizhihao
  */
-public interface FastRetryInterceptorPolicy<T> extends FastRetryPolicy {
+public interface FastInterceptorPolicy<T> extends FastRetryPolicy {
 
     /**
      * Before each retry execution

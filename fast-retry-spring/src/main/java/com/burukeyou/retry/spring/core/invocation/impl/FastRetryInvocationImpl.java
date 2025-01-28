@@ -27,7 +27,7 @@ public class FastRetryInvocationImpl extends AbstractMethodInvocation implements
 
 
     @Override
-    public FastRetry getFastRetryAnnotation() {
+    public FastRetry getFastRetry() {
         return fastRetry;
     }
 

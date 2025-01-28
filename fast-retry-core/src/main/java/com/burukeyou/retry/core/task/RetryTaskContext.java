@@ -1,6 +1,6 @@
 package com.burukeyou.retry.core.task;
 
-import com.burukeyou.retry.core.policy.MethodResultPolicy;
+import com.burukeyou.retry.core.policy.FastMethodPolicy;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public class RetryTaskContext {
     private Long waitRetryTime;
     private Boolean retryIfException;
     private Boolean exceptionRecover;
-    private MethodResultPolicy<Object> resultPolicy;
+    private FastMethodPolicy<Object> resultPolicy;
     private List<Class<? extends Exception>> exceptionsType;
     private List<Class<? extends Exception>> excludeExceptionsType;
 }
