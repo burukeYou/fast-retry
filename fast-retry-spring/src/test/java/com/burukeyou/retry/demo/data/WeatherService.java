@@ -72,6 +72,12 @@ public class WeatherService {
         return new WeatherResult(cityName + "-哈哈");
     }
 
+    @FastRetry(retryWait = @RetryWait(delay = 2),maxAttempts = 100, policy = WeatherServiceResultPredicate.class)
+    public void  getWeatherForTestRetryStrategy1(String cityName){
+        log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
+    }
+
+
     @FastRetry(delay = 5000,maxAttempts = 15)
     public WeatherResult getWeatherForTestRetryStrategy2(String cityName, FastResultPolicy<WeatherResult> policy){
         int i = new Random().nextInt(40);
