@@ -178,20 +178,12 @@
                         </goals>
                     </execution>
                     <execution>
-                        <!-- 在哪个阶段运行 -->
                         <id>flatten.package</id>
                         <phase>package</phase>
                         <goals>
                             <goal>flatten</goal>
                         </goals>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>flatten.clean</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>clean</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
                 </executions>
             </plugin>
         </plugins>
