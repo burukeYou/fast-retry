@@ -87,7 +87,7 @@ public interface RetryTask<R> {
 
     /**
      * This method is called back after the retry task is executed finish, and if the task has an exception message, it will be returned
-     * @param throwable    the execute exception info throw by  the {@link  #retry(long)} method
+     * @param throwable    the execute exception info throw by  the {@link  #retry()} method
      */
     default void retryAfter(Exception throwable) {
 
