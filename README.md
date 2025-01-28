@@ -331,6 +331,46 @@ public class UserService {
     }
 ```
 
+## 3.7 自定义 @FastRetry注解名
+如果觉得@FastRetry注解名不好听 或者说 想要修改默认的重试配置参数， 都可以通过 自定义 @FastRetry注解名去解决
+
+
+1） 比如自定义 @BBQFastRetry 注解， 只需要在类上标记 @FastRetry注解即可, 然后设置默认值即可。 
+使用 @AliasFor 标记表示去继承@FastRetry的属性
+
+```java
+@Target({ElementType.METHOD,ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@FastRetry(
+        errLog = LogEnum.PRE_1_LAST_1,  // 设置只打印第一个和最后一次重试的异常信息
+        policy = AllPolicy.MyPolicy1.class // 设置默认的重试策略
+)
+public @interface BQRetry {
+
+    // 继承@FastRetry的maxAttempts属性， 并修改默认重试次数为20次
+    @AliasFor(annotation = FastRetry.class)
+    int maxAttempts() default 20;
+
+  // 继承@FastRetry的delay属性， 并修改默认延迟重试时间为0，立刻马上重试
+  @AliasFor(annotation = FastRetry.class)
+    long delay() default 0;
+
+}
+
+```
+
+2) 之后使用 @BBQFastRetry 替代使用 @FastRetry 即可
+
+```java
+      @BBQFastRetry(delay = 5000, maxAttempts = 15)
+      public UserInfo getUser(String cityName, FastResultPolicy<UserInfo> policy) {
+        return new UserInfo();
+      }
+```
+
+
+
 
 # 4、赞赏
 -------
