@@ -1,8 +1,9 @@
-package com.burukeyou.retry.spring.core;
+package com.burukeyou.retry.spring.core.aop;
 
 import com.burukeyou.retry.core.RetryQueue;
 import com.burukeyou.retry.core.task.RetryTask;
 import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.core.extend.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.retrytask.RetryAnnotationTask;
 import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 import com.burukeyou.retry.spring.utils.BizUtil;

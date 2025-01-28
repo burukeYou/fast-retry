@@ -1,7 +1,7 @@
 package com.burukeyou.retry.spring.annotations;
 
 
-import com.burukeyou.retry.spring.core.FastRetryAdvisorConfiguration;
+import com.burukeyou.retry.spring.core.aop.FastRetryAdvisorConfiguration;
 import com.burukeyou.retry.spring.config.FastRetrySpringConfiguration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;

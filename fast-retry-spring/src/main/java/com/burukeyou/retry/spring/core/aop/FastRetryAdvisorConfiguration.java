@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring.core;
+package com.burukeyou.retry.spring.core.aop;
 
 import com.burukeyou.retry.spring.annotations.EnableFastRetry;
 import com.burukeyou.retry.spring.annotations.FastRetry;
