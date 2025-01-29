@@ -4,7 +4,7 @@ package com.burukeyou.retry.spring.core.retrytask;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.core.policy.RetryPolicy;
-import com.burukeyou.retry.core.utils.Tuple2;
+import com.burukeyou.retry.core.entity.Tuple2;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;

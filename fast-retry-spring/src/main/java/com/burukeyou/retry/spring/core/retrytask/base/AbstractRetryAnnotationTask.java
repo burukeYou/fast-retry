@@ -1,9 +1,10 @@
 package com.burukeyou.retry.spring.core.retrytask.base;
 
+import com.burukeyou.retry.core.entity.RetryCounter;
 import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.task.RetryTask;
-import com.burukeyou.retry.core.utils.Tuple2;
+import com.burukeyou.retry.core.entity.Tuple2;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
