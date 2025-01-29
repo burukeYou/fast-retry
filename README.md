@@ -53,7 +53,7 @@ Guava-Retry均无法支持大批量任务的重试，因为每一个重试任务
 <dependency>
     <groupId>io.github.burukeyou</groupId>
     <artifactId>fast-retry-core</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 
@@ -89,7 +89,7 @@ Guava-Retry均无法支持大批量任务的重试，因为每一个重试任务
 <dependency>
     <groupId>io.github.burukeyou</groupId>
     <artifactId>fast-retry-spring</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 
