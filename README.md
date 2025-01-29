@@ -60,20 +60,16 @@ Guava-Retry均无法支持大批量任务的重试，因为每一个重试任务
 然后使用FastRetryBuilder去构建我们的重试任务
 
 ```java
-        RetryResultPolicy<String> resultPolicy=result->result.equals("444");
+        FastResultPolicy<String> resultPolicy=result->result.equals("444");
         FastRetryer<String> retryer=FastRetryBuilder.<String>builder()
-        .attemptMaxTimes(3)
-        .waitRetryTime(3,TimeUnit.SECONDS)
-        .retryIfException(true)
-        .retryIfExceptionOfType(TimeoutException.class)
-        .exceptionRecover(true)
-        .retryPolicy(resultPolicy)
+        .attemptMaxTimes(3)  // 指定最大重试次数
+        .waitRetryTime(3,TimeUnit.SECONDS) // 指定下一次重试间隔时间
+        .retryIfExceptionOfType(TimeoutException.class) // 指定，当发生指定异常TimeoutException才进行重试
+        .retryPolicy(resultPolicy)   // 指定当结果为444是就进行重试
         .build();
 
         CompletableFuture<String> future=retryer.submit(()->{
         log.info("重试");
-        //throw new Exception("test");
-        //int i = 1/0;
         if(0< 10){
         throw new TimeoutException("test");
         }
