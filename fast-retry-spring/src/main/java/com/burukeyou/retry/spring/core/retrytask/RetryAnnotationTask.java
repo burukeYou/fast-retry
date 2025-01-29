@@ -4,20 +4,23 @@ package com.burukeyou.retry.spring.core.retrytask;
 import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.core.policy.RetryPolicy;
+import com.burukeyou.retry.core.utils.Tuple2;
 import com.burukeyou.retry.spring.annotations.FastRetry;
+import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.core.invocation.impl.FastRetryInvocationImpl;
 import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
 import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
+import com.burukeyou.retry.spring.core.retrytask.base.AbstractRetryAnnotationTask;
 import com.burukeyou.retry.spring.support.FastFutureCallable;
-import com.burukeyou.retry.spring.support.Tuple2;
 import com.burukeyou.retry.spring.utils.BizUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
@@ -36,10 +39,20 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
         super(new FastRetryAnnotationAdapter(fastRetry),methodInvocation,beanFactory);
         this.fastRetry = fastRetry;
         this.runnable = new FastFutureCallable<>(runnable);
-        fastRetryInterceptor = BizUtil.getBeanOrNew(retryConfig.interceptor(), beanFactory);
+        fastRetryInterceptor = BizUtil.getBeanOrNew(fastRetry.interceptor().length > 0 ? fastRetry.interceptor()[0] : null, beanFactory);
         this.retryInvocation = new FastRetryInvocationImpl(methodInvocation, fastRetry,retryCounter);
     }
 
+    @Override
+    public long waitRetryTime() {
+        if (fastRetry.retryWait().length > 0) {
+            RetryWait retryWait = fastRetry.retryWait()[0];
+            long delay = retryWait.delay();
+            TimeUnit timeUnit = retryWait.timeUnit();
+            return timeUnit.toMillis(delay);
+        }
+        return super.waitRetryTime();
+    }
 
     @Override
     public void retryBefore() {

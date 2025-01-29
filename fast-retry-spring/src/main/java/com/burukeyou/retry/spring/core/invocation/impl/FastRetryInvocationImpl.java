@@ -4,7 +4,7 @@ package com.burukeyou.retry.spring.core.invocation.impl;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.core.invocation.AbstractMethodInvocation;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
-import com.burukeyou.retry.spring.core.retrytask.RetryCounter;
+import com.burukeyou.retry.spring.core.retrytask.base.RetryCounter;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.util.HashMap;

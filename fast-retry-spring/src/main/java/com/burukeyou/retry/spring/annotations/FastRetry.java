@@ -1,11 +1,11 @@
 package com.burukeyou.retry.spring.annotations;
 
 
-import com.burukeyou.retry.core.policy.FastRetryPolicy;
+import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.FastResultPolicy;
+import com.burukeyou.retry.core.policy.FastRetryPolicy;
 import com.burukeyou.retry.spring.core.extend.AnnotationRetryTaskFactory;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
-import com.burukeyou.retry.spring.core.policy.LogEnum;
 import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
 
 import java.lang.annotation.*;
