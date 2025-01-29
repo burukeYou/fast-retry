@@ -2,6 +2,7 @@ package com.burukeyou.retry.demo.data;
 
 
 import com.burukeyou.retry.core.FastRetryBuilder;
+import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.demo.anno.BQRetry;
 import com.burukeyou.retry.demo.data.policy.AllPolicy;
@@ -9,7 +10,6 @@ import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
-import com.burukeyou.retry.spring.core.policy.LogEnum;
 import com.burukeyou.retry.spring.core.policy.FastInterceptorPolicy;
 import com.burukeyou.retry.spring.core.policy.FastRetryFuture;
 import com.github.rholder.retry.*;
