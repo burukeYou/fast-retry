@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring.core.retrytask;
+package com.burukeyou.retry.core.entity;
 
 import lombok.Getter;
 

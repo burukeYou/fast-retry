@@ -1,9 +1,7 @@
-package com.burukeyou.retry.spring.core.retrytask;
+package com.burukeyou.retry.spring.core.retrytask.base;
 
+import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.RetryPolicy;
-import com.burukeyou.retry.spring.annotations.RetryWait;
-import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
-import com.burukeyou.retry.spring.core.policy.LogEnum;
 
 /**
  * @author  caizhihao
@@ -14,12 +12,6 @@ public interface FastRetryAdapter {
      * @return the maximum number of attempts , if -1, it means unlimited
      */
     int maxAttempts();
-
-    /**
-     * How long will it take to start the next retry, equals to {@link #delay},
-     * If both are configured, retryWait() will take effect first
-     */
-    RetryWait retryWait() ;
 
     /**
      * How long will it take to start the next retry, unit is MILLISECONDS
@@ -73,9 +65,5 @@ public interface FastRetryAdapter {
      */
     Class<? extends RetryPolicy> policy() ;
 
-    /**
-     *  use custom  retry interceptor,
-     */
-    Class<? extends FastRetryInterceptor> interceptor() ;
 
 }

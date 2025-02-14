@@ -1,6 +1,5 @@
-package com.burukeyou.retry.spring.core.policy;
+package com.burukeyou.retry.core.enums;
 
-import com.burukeyou.retry.spring.annotations.FastRetry;
 import lombok.Getter;
 
 /**
@@ -11,7 +10,7 @@ import lombok.Getter;
 public enum LogEnum {
 
     /**
-     * Automatically go through different printing logic according to the different {@link FastRetry#maxAttempts()} values
+     * Automatically go through different printing logic according to the different maxAttempts values
      * <ul>
      *     <li>When it is 0, it is not printed</li>
      *     <li>When less than or equal to 2, print every time</li>

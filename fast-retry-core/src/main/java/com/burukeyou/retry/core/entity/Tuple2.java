@@ -1,4 +1,4 @@
-package com.burukeyou.retry.spring.support;
+package com.burukeyou.retry.core.entity;
 
 import lombok.Data;
 

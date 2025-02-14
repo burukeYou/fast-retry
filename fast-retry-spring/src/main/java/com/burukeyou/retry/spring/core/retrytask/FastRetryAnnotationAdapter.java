@@ -1,15 +1,14 @@
 package com.burukeyou.retry.spring.core.retrytask;
 
+import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.FastRetryPolicy;
 import com.burukeyou.retry.spring.annotations.FastRetry;
-import com.burukeyou.retry.spring.annotations.RetryWait;
-import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
-import com.burukeyou.retry.spring.core.policy.LogEnum;
+import com.burukeyou.retry.spring.core.retrytask.base.FastRetryAdapter;
 
 /**
  * @author  caizhihao
  */
-public class FastRetryAnnotationAdapter implements  FastRetryAdapter {
+public class FastRetryAnnotationAdapter implements FastRetryAdapter {
 
     private final FastRetry fastRetry;
 
@@ -20,12 +19,6 @@ public class FastRetryAnnotationAdapter implements  FastRetryAdapter {
     @Override
     public int maxAttempts() {
         return fastRetry.maxAttempts();
-    }
-
-    @Override
-    public RetryWait retryWait() {
-        RetryWait[] retryWaits = fastRetry.retryWait();
-        return  retryWaits.length > 0 ? retryWaits[0] : null;
     }
 
     @Override
@@ -66,10 +59,5 @@ public class FastRetryAnnotationAdapter implements  FastRetryAdapter {
     @Override
     public Class<? extends FastRetryPolicy> policy() {
         return fastRetry.policy().length > 0 ? fastRetry.policy()[0] : null;
-    }
-
-    @Override
-    public Class<? extends FastRetryInterceptor> interceptor() {
-        return fastRetry.interceptor().length > 0 ? fastRetry.interceptor()[0] : null;
     }
 }

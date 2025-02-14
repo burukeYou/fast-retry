@@ -1,11 +1,10 @@
-package com.burukeyou.retry.spring.core.retrytask;
+package com.burukeyou.retry.spring.core.retrytask.base;
 
-import com.burukeyou.retry.core.policy.FastRetryPolicy;
+import com.burukeyou.retry.core.entity.RetryCounter;
+import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.task.RetryTask;
-import com.burukeyou.retry.spring.annotations.RetryWait;
-import com.burukeyou.retry.spring.core.policy.LogEnum;
-import com.burukeyou.retry.spring.support.Tuple2;
+import com.burukeyou.retry.core.entity.Tuple2;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
@@ -16,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author  caizhihao
@@ -33,7 +31,7 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
 
     protected static final Map<Method, RetryPolicy> methodToRetryPolicyCache = new ConcurrentHashMap<>();
 
-    private static final FastRetryPolicy NULL_POLICY = new FastRetryPolicy(){};
+    private static final RetryPolicy NULL_POLICY = new RetryPolicy(){};
 
     protected AbstractRetryAnnotationTask(FastRetryAdapter retryConfig,
                                           MethodInvocation methodInvocation,
@@ -50,12 +48,6 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
 
     @Override
     public long waitRetryTime() {
-        if (retryConfig.retryWait() != null) {
-            RetryWait retryWait = retryConfig.retryWait();
-            long delay = retryWait.delay();
-            TimeUnit timeUnit = retryWait.timeUnit();
-            return timeUnit.toMillis(delay);
-        }
         return retryConfig.delay();
     }
 
@@ -93,7 +85,7 @@ public abstract class AbstractRetryAnnotationTask<R> implements RetryTask<R> {
                 start = System.currentTimeMillis();
             }
 
-            Tuple2<Boolean, RetryPolicy>tuple2 = new Tuple2<>();
+            Tuple2<Boolean, RetryPolicy> tuple2 = new Tuple2<>();
             RetryPolicy retryPolicy = findRetryPolicy(tuple2);
             if (tuple2.getC2() != null){
                 return tuple2.getC1();
