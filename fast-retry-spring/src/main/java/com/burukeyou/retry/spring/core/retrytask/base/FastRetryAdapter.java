@@ -4,7 +4,7 @@ import com.burukeyou.retry.core.enums.LogEnum;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 
 /**
- * @author  caizhihao
+ * @author caizhihao
  */
 public interface FastRetryAdapter {
 
@@ -20,6 +20,7 @@ public interface FastRetryAdapter {
 
     /**
      * Flag to say that whether try again when an exception occurs
+     * 
      * @return try again if true
      */
     boolean retryIfException();
@@ -46,7 +47,8 @@ public interface FastRetryAdapter {
     boolean exceptionRecover();
 
     /**
-     * Flag to say that whether print every time execute retry exception log, just prevent printing too many logs
+     * Flag to say that whether print every time execute retry exception log, just
+     * prevent printing too many logs
      */
     LogEnum errLog();
 
@@ -55,15 +57,26 @@ public interface FastRetryAdapter {
      * if so, only the first three lines of stack information will be printed,
      * and if the first execution fails, this configuration will be ignored,
      * and the complete exception information will still be printed
+     * 
      * @see #errLog()
      */
     boolean briefErrorLog();
 
     /**
-     *  use custom  retry strategy,
+     * use custom retry strategy,
+     * 
      * @return the class of retry-result-policy
      */
-    Class<? extends RetryPolicy> policy() ;
+    Class<? extends RetryPolicy> policy();
 
+    /**
+     * If the expression is true, the retry continues, otherwise the retry stops.
+     * You can use $.xx to represent the value of the field where the method returns
+     * a value,
+     * and use it in an expression, such as $.userId > 3
+     */
+    default String retryWhenExpression() {
+        return null;
+    }
 
 }

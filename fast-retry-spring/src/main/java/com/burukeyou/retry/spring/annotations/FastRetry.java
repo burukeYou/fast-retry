@@ -80,6 +80,13 @@ public @interface FastRetry {
     boolean briefErrorLog() default false;
 
     /**
+     * If the expression is true, the retry continues, otherwise the retry stops. 
+     * You can use $.xx to represent the value of the field where the method returns a value,
+     *  and use it in an expression, such as $.userId > 3 
+     */
+    String retryWhenExpression() default "";
+
+    /**
      *  use custom  retry strategy,
      *  <p>Currently, the following policies are supported:</p>
      *  <ul>
