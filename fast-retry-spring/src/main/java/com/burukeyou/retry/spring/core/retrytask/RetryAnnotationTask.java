@@ -5,8 +5,10 @@ import com.burukeyou.retry.core.exceptions.RetryPolicyCastException;
 import com.burukeyou.retry.core.policy.FastResultPolicy;
 import com.burukeyou.retry.core.policy.RetryPolicy;
 import com.burukeyou.retry.core.entity.Tuple2;
+import com.burukeyou.retry.core.util.StrUtil;
 import com.burukeyou.retry.spring.annotations.FastRetry;
 import com.burukeyou.retry.spring.annotations.RetryWait;
+import com.burukeyou.retry.spring.core.expression.FastRetryExpressionEvaluator;
 import com.burukeyou.retry.spring.core.interceptor.FastRetryInterceptor;
 import com.burukeyou.retry.spring.core.invocation.FastRetryInvocation;
 import com.burukeyou.retry.spring.core.invocation.impl.FastRetryInvocationImpl;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.BeanFactory;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,8 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
     protected FastRetryInvocation retryInvocation;
     protected FastRetry fastRetry;
 
+    private static FastRetryExpressionEvaluator expressionEvaluator;
+
     public RetryAnnotationTask(Callable<Object> runnable,
                                FastRetry fastRetry,
                                BeanFactory beanFactory,
@@ -41,6 +46,14 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
         this.runnable = new FastFutureCallable<>(runnable);
         fastRetryInterceptor = BizUtil.getBeanOrNew(fastRetry.interceptor().length > 0 ? fastRetry.interceptor()[0] : null, beanFactory);
         this.retryInvocation = new FastRetryInvocationImpl(methodInvocation, fastRetry,retryCounter);
+
+        if(expressionEvaluator == null){
+            synchronized (FastRetryExpressionEvaluator.class){
+                if (expressionEvaluator == null){
+                    expressionEvaluator = new FastRetryExpressionEvaluator(beanFactory);
+                }
+            }
+        }
     }
 
     @Override
@@ -84,6 +97,11 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
     @Override
     protected boolean doRetry(RetryPolicy retryPolicy) throws Exception {
         if (retryPolicy == null) {
+            String expression = retryConfig.retryWhenExpression();
+            if (StrUtil.isNotBlank(expression)) {
+                return retryDoForExpression(expression);
+            }
+
             return retryDoForNotRetryPolicy();
         }
         if (FastResultPolicy.class.isAssignableFrom(retryPolicy.getClass())) {
@@ -93,6 +111,14 @@ public class RetryAnnotationTask extends AbstractRetryAnnotationTask<Object> {
             return retryDoForInterceptorPolicy((FastInterceptorPolicy<Object>) retryPolicy);
         }
         throw new IllegalArgumentException("FastRetry not support other RetryPolicy for " + retryPolicy.getClass().getName());
+    }
+
+    private boolean retryDoForExpression(String expression) throws Exception {
+        Object methodResult = doInvokeMethod();
+        Method method = retryInvocation.getMethod();
+        Object[] arguments = retryInvocation.getArguments();
+        Boolean value = expressionEvaluator.parseExpression(method, arguments, methodResult, expression, Boolean.class);
+        return value;
     }
 
 

@@ -7,6 +7,6 @@ public class StrUtil {
     }
 
     public static boolean isBlank(String str) {
-        return str == null || str.length() == 0 || "".equals(str);
+        return str == null || str.isEmpty();
     }
 }

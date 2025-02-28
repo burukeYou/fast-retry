@@ -228,4 +228,11 @@ public class WeatherService {
         }
     }
 
+    @FastRetry(delay = 2000,
+               maxAttempts = 100,
+               retryWhen = "#cityname != '处理中' ")
+    public WeatherResult getWeatherForTestRetryExpression(String cityName){
+        log.info("WeatherService进行重试  次数:{} 城市: {}",++index,cityName);
+        return new WeatherResult("处理中");
+    }
 }

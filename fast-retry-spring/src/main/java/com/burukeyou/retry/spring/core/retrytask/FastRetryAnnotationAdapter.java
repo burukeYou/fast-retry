@@ -60,4 +60,9 @@ public class FastRetryAnnotationAdapter implements FastRetryAdapter {
     public Class<? extends FastRetryPolicy> policy() {
         return fastRetry.policy().length > 0 ? fastRetry.policy()[0] : null;
     }
+
+    @Override
+    public String retryWhenExpression() {
+        return fastRetry.retryWhen();
+    }
 }
